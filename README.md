@@ -1,2 +1,2 @@
-# aiprog
-Kunsig Intelligens - Programmering
+# Kunsig Intelligens - Programmering
+
