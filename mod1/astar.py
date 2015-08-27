@@ -18,9 +18,6 @@ class Map:
                 for y in range(wallheight):
                     self.grid[basey+y][basex+x] = '##'
 
-    def neighbors(self, xpos, ypos):
-        results = [()]
-
     def printMap(self):
         for i in self.grid:
             print '|',
