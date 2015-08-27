@@ -18,12 +18,9 @@ class Map:
                 for y in range(wallheight):
                     self.grid[basey+y][basex+x] = '# '
 
-
     def printMap(self):
         for i in self.grid:
             print i
-
-
 
 onlyNumbers = re.compile('\d+(?:\.\d+)?')
 
