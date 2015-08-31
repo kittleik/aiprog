@@ -1,23 +1,58 @@
 import sys
 import re
+import heapq, Queue
+
 inFile = sys.argv[1]
 
 
 class Node(object):
-    def __init__(self, state, g_cost, h_cost, status, parent, kids):
-        self.state = state
-        self.g_cost = g_cost
-        self.h_cost = h_cost
-        self.f_cost = self.g_cost + self.h_cost
-        self.status = status
-        self.parent = parent
-        self.kids = kids
+    def __init__(self,x, y, parent, kids):
+        self.g_cost = 0
+        self.h_cost = 0
+        self.f_cost = 0
+        self.parent = None
+        self.kids = None
+        self.x = x
+        self.y = y
 
 
 class A_star_search(object):
     def __init__(self):
         self.openlist = []
+        heapq.heapify(self.openlist)
         self.closedlist = []
+
+
+    def calculate_heuristic(self ,x ,y ,goal ):
+        return abs(x-goal[0]) + abs(y-goal[1])
+
+    def run(self):
+        # creating initial node
+        start = (1,0)
+        goal = (4,2)
+        path = []
+        initial_node = Node(1,0,None,None)
+        initial_node.g_cost = 1
+        initial_node.h_cost = self.calculate_heuristic(initial_node.x, initial_node.y, goal)
+        initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
+        #pushes into openlist that is a priorty queue with
+        heapq.heappush(self.openlist, (initial_node.f_cost, (1,0)))
+
+        while not path and len(openlist) > 0 :
+            f, node = heapq.heappop(self.openlist)
+            closedlist.add(node)
+            if node == self.goal:
+                #display path, break the while loop
+                print "solution found"
+            successors = generate_successor(node)
+            for successor in successors:
+
+
+
+
+    #def createState(self, openlist=[]):
+
+
 
 
 
@@ -58,3 +93,12 @@ walls = instructions[3:]
 theMap = Map(width, height, start, goal, walls)
 
 theMap.printMap()
+
+star = A_star_search()
+
+star.run()
+
+a = ['a','b','c']
+
+if (1,1) == (1,1):
+    print "hei"
