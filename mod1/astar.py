@@ -26,7 +26,9 @@ class A_star_search(object):
         return abs(position[0]-goal[0]) + abs(position[1]-goal[1])
 
     def generate_successor(self, node):
+
         return "TODO, lag dette, return en liste med kidsnoder"
+
     def unique (self, node):
         return "returner bool"
     def run(self):
@@ -78,9 +80,11 @@ class A_star_search(object):
 
 class Map:
     def __init__(self, width, height, start, goal, walls):
-        self.grid = [['.' for i in range(width)] for i in range(height)]
-        self.grid[start[1]][start[0]] = 'S'
-        self.grid[goal[1]][goal[0]] = 'G'
+        #creating empty grid
+        self.grid = [[' ' for i in range(width)] for i in range(height)]
+        #adding start, goal and walls
+        self.grid[start[0]][start[1]] = 'S'
+        self.grid[goal[0]][goal[1]] = 'G'
 
         for i in walls:
             basex = i[0]
@@ -90,10 +94,10 @@ class Map:
             wallheight = i[3]
             for x in range(wallwidth):
                 for y in range(wallheight):
-                    self.grid[basey+y][basex+x] = '#'
+                    self.grid[basex+x][basey+y] = '#'
 
     def printMap(self):
-        for i in reversed(self.grid):
+        for i in (self.grid):
             print '|',
             for y in i:
                 print y,
@@ -114,19 +118,13 @@ theMap = Map(width, height, start, goal, walls)
 
 theMap.printMap()
 
-star = A_star_search()
+#star = A_star_search()
 
-star.run()
+#star.run()
 
-a = ['a','b','c']
+print "position (1,0): " + theMap.grid[1][0]
+print "position (5,5): " + theMap.grid[5][5]
 
-if (1,1) == (1,1):
-    print "hei"
-a.append('f')
-print a
 
-initial_node = Node((1,0),None)
-
-print initial_node.parent
 
 
