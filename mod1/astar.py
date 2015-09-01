@@ -11,7 +11,7 @@ class Node(object):
         self.h_cost = 0
         self.f_cost = 0
         self.parent = None
-        self.kids = None
+        self.kids = []
         self.x = x
         self.y = y
 
@@ -20,32 +20,42 @@ class A_star_search(object):
     def __init__(self):
         self.openlist = []
         heapq.heapify(self.openlist)
-        self.closedlist = []
+        self.closedlist = set()
 
 
     def calculate_heuristic(self ,x ,y ,goal ):
         return abs(x-goal[0]) + abs(y-goal[1])
+
+    def generate_successor(self, node):
+        return "TODO, lag dette"
 
     def run(self):
         # creating initial node
         start = (1,0)
         goal = (4,2)
         path = []
+        move_cost = 1
         initial_node = Node(1,0,None,None)
         initial_node.g_cost = 1
         initial_node.h_cost = self.calculate_heuristic(initial_node.x, initial_node.y, goal)
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
         #pushes into openlist that is a priorty queue with
         heapq.heappush(self.openlist, (initial_node.f_cost, (1,0)))
-
+        #Agenda loop
         while not path and len(openlist) > 0 :
             f, node = heapq.heappop(self.openlist)
             closedlist.add(node)
             if node == self.goal:
                 #display path, break the while loop
+                # path = 1
                 print "solution found"
+                break
+            #adds to the open list
             successors = generate_successor(node)
             for successor in successors:
+                if unique(successor):
+                    closedlist.
+
 
 
 
@@ -102,3 +112,5 @@ a = ['a','b','c']
 
 if (1,1) == (1,1):
     print "hei"
+a.append('f')
+print a
