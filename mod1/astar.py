@@ -10,63 +10,103 @@ class Node(object):
         self.g_cost = 0
         self.h_cost = 0
         self.f_cost = 0
+        self.move_cost = 1
         self.parent = parent
         self.kids = []
         self.position = position
 
+    def __cmp__(self, other):
+        return cmp(self.f_cost, other.f_cost)
+        
+    def appendkid(self, node):
+        self.kids.append(node)
+
 
 class A_star_search(object):
-    def __init__(self):
+
+    def __init__(self, map):
         self.openlist = []
         heapq.heapify(self.openlist)
         self.closedlist = []
+        self.map = map
+        self.map.printMap()
 
 
-    def calculate_heuristic(self , position ,goal ):
-        return abs(position[0]-goal[0]) + abs(position[1]-goal[1])
+    def calculate_heuristic(self , position, goal):
+        return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
     def generate_successor(self, node):
+        successors = []
 
-        return "TODO, lag dette, return en liste med kidsnoder"
+        if node.position[0]+1 <= self.map.mapsize[0]-1:
+            new_node1 = Node((node.position[0]+1, node.position[1]), node)
+            successors.append(new_node1)
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            new_node2 = Node((node.position[0], node.position[1]+1), node)
+            successors.append(new_node2)
+        if node.position[0]-1 >= 0:
+            new_node3 = Node((node.position[0]-1, node.position[1]), node)
+            successors.append(new_node3)
+        if node.position[1]-1 >= 0:
+            new_node4 = Node((node.position[0], node.position[1]-1), node)
+            successors.append(new_node4)
+
+        for node in successors:
+            if node.position in self.map.walls:
+                node.move_cost=1000
+
+        return successors
 
     def unique (self, node):
-        return "returner bool"
+        if node in self.closedlist or node in self.openlist:
+            return False
+        return True
+
+    def attach_eval(self, child, parent):
+        child.parent = parent
+        child.g_cost = parent.g_cost + child.move_cost
+        child.h_cost = self.calculate_heuristic(child.position, self.goal)
+        child.f_cost = child.g_cost + child.h_cost
+
     def run(self):
         # creating initial node
-        start = (1,0)
-        goal = (4,2)
+        self.start = self.map.start
+        print "starting position is %s" % (self.start,)
+        self.goal = self.map.goal
+        print "the goal is at  %s" % (self.goal,)
         path = []
         move_cost = 1
-        initial_node = Node((1,0),None)
+        initial_node = Node(self.start,None)
         initial_node.g_cost = 1
-        initial_node.h_cost = self.calculate_heuristic((1,0), goal)
+        initial_node.h_cost = self.calculate_heuristic(initial_node.position, self.goal)
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
         #pushes into openlist that is a priorty queue with
         heapq.heappush(self.openlist, initial_node)
         #Agenda loop
 
         while True:
-            if len(openlist) == 0:
+            if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
 
             node = heapq.heappop(self.openlist)
-            closedlist.append(node)
+            print node.position
+            self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
                 # path = 1
                 print "solution found"
                 break
             #adds to the open list
-            successors = generate_successor(node)
-            for successor in successors:
+            self.successors = self.generate_successor(node)
+            for successor in self.successors:
                 node.appendkid(successor)
-                if unique(successor):
-                    attach_eval()
-                    heapq.heappush(openlist, successor)
-                elif node.g_cost + arc_cost(node,successor) < successor.g_cost:
-                    attach_eval()
-                    if successor in closedlist:
+                if self.unique(successor):
+                    self.attach_eval(successor, node)
+                    heapq.heappush(self.openlist, successor)
+                elif node.g_cost + successor.move_cost < successor.g_cost:
+                    self.attach_eval(successor,node)
+                    if successor in self.closedlist:
                         propagate_path_improvements(successor)
 
 
@@ -81,10 +121,15 @@ class A_star_search(object):
 class Map:
     def __init__(self, width, height, start, goal, walls):
         #creating empty grid
-        self.grid = [[' ' for i in range(width)] for i in range(height)]
+        self.mapsize =(width,height)
+        print self.mapsize
+        self.grid = [['.' for i in range(width)] for i in range(height)]
         #adding start, goal and walls
+        self.goal = tuple(goal)
+        self.start = tuple(start)
         self.grid[start[0]][start[1]] = 'S'
         self.grid[goal[0]][goal[1]] = 'G'
+        self.walls = []
 
         for i in walls:
             basex = i[0]
@@ -95,6 +140,7 @@ class Map:
             for x in range(wallwidth):
                 for y in range(wallheight):
                     self.grid[basex+x][basey+y] = '#'
+                    self.walls.append((basex+x,basey+y))
 
     def printMap(self):
         for i in (self.grid):
@@ -115,16 +161,8 @@ goal = instructions[2]
 walls = instructions[3:]
 
 theMap = Map(width, height, start, goal, walls)
-
-theMap.printMap()
-
-#star = A_star_search()
-
-#star.run()
+star = A_star_search(theMap)
+star.run()
 
 print "position (1,0): " + theMap.grid[1][0]
 print "position (5,5): " + theMap.grid[5][5]
-
-
-
-
