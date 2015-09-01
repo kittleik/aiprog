@@ -17,10 +17,9 @@ class Node(object):
 
     def __cmp__(self, other):
         return cmp(self.f_cost, other.f_cost)
-        
+
     def appendkid(self, node):
         self.kids.append(node)
-
 
 class A_star_search(object):
 
@@ -68,6 +67,19 @@ class A_star_search(object):
         child.h_cost = self.calculate_heuristic(child.position, self.goal)
         child.f_cost = child.g_cost + child.h_cost
 
+    def propogate_path_improvements(self, parent):
+        for kid in parent.kids:
+            if parent.g_cost + kid.move_cost < kid.g_cost:
+                kid.parent = parent
+                kid.g_cost = parent.g_cost + kid.move_cost
+                kif.f_cost = kid.g_cost + kid.h_cost
+                self.propogate_path_improvements(kid)
+
+    def draw_path_to_map(self, node):
+        self.map.grid[node.position[0]][node.position[1]] = 'x'
+        if node.parent:
+            self.draw_path_to_map(node.parent)
+
     def run(self):
         # creating initial node
         self.start = self.map.start
@@ -90,12 +102,13 @@ class A_star_search(object):
                 break
 
             node = heapq.heappop(self.openlist)
-            print node.position
             self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
                 # path = 1
                 print "solution found"
+                self.draw_path_to_map(node)
+                self.map.printMap()
                 break
             #adds to the open list
             self.successors = self.generate_successor(node)
@@ -163,6 +176,3 @@ walls = instructions[3:]
 theMap = Map(width, height, start, goal, walls)
 star = A_star_search(theMap)
 star.run()
-
-print "position (1,0): " + theMap.grid[1][0]
-print "position (5,5): " + theMap.grid[5][5]
