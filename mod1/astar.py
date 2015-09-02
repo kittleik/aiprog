@@ -102,6 +102,8 @@ class A_star_search(object):
                 break
 
             node = heapq.heappop(self.openlist)
+            self.map.grid[node.position[0]][node.position[1]] = 'o'
+            self.map.printMap()
             self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
@@ -124,10 +126,7 @@ class A_star_search(object):
 
 
 
-
     #def createState(self, openlist=[]):
-
-
 
 
 
