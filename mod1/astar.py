@@ -143,7 +143,7 @@ class A_star_search(object):
                 self.draw_path_to_map(node)
                 self.map.printMap()
                 print "pathlength: %d" % (self.pathlength)
-                print "number of searchnodes: %d" %(self.count)
+                print "number of searchnodes: %d\n" %(self.count)
                 break
             #adds to the open list
             self.successors = self.generate_successor(node)
