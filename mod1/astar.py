@@ -16,7 +16,8 @@ class Node(object):
 
 
 class A_star_search(object):
-    def __init__(self):
+    def __init__(self, search_map):
+        self.map = search_map
         self.openlist = []
         heapq.heapify(self.openlist)
         self.closedlist = []
@@ -26,20 +27,31 @@ class A_star_search(object):
         return abs(position[0]-goal[0]) + abs(position[1]-goal[1])
 
     def generate_successor(self, node):
-
-        return "TODO, lag dette, return en liste med kidsnoder"
+        parentX = node.position[0]
+        parentY = node.position[1]
+        kids = []
+        #Generating kids clockwise from the node to the right of parent
+        if parentX < self.search_map.width - 1:
+            kids.append(Node((parentX + 1, parentY),node))
+        if parentY > 0:
+            kids.append(Node((parentX, parentY -1 ),node))
+        if parentX > 0:
+            kids.append(Node((parentX - 1, parentY),node))
+        if parentY < self.search_map.height - 1:
+            kids.append(Node((parentX, parentY + 1),node))
+        return kids
 
     def unique (self, node):
         return "returner bool"
     def run(self):
         # creating initial node
-        start = (1,0)
-        goal = (4,2)
+        start = search_map.start
+        goal = search_map.goal
         path = []
         move_cost = 1
-        initial_node = Node((1,0),None)
+        initial_node = Node(start,None)
         initial_node.g_cost = 1
-        initial_node.h_cost = self.calculate_heuristic((1,0), goal)
+        initial_node.h_cost = self.calculate_heuristic(initial_node.position, goal)
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
         #pushes into openlist that is a priorty queue with
         heapq.heappush(self.openlist, initial_node)
@@ -80,6 +92,10 @@ class A_star_search(object):
 
 class Map:
     def __init__(self, width, height, start, goal, walls):
+        self.start = start
+        self.goal = goal
+        self.width = width
+        self.height = height
         #creating empty grid
         self.grid = [[' ' for i in range(width)] for i in range(height)]
         #adding start, goal and walls
@@ -117,13 +133,11 @@ walls = instructions[3:]
 theMap = Map(width, height, start, goal, walls)
 
 theMap.printMap()
-
-#star = A_star_search()
-
+node = Node((1,0),None)
+star = A_star_search(theMap)
+star.generate_successor(node)
 #star.run()
 
-print "position (1,0): " + theMap.grid[1][0]
-print "position (5,5): " + theMap.grid[5][5]
 
 
 
