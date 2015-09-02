@@ -58,6 +58,7 @@ class A_star_search(object):
 
     def unique (self, node):
         if node in self.closedlist or node in self.openlist:
+            print "not unique"
             return False
         return True
 
@@ -68,6 +69,7 @@ class A_star_search(object):
         child.f_cost = child.g_cost + child.h_cost
 
     def propogate_path_improvements(self, parent):
+        print "propogate_path_improvements()"
         for kid in parent.kids:
             if parent.g_cost + kid.move_cost < kid.g_cost:
                 kid.parent = parent
@@ -76,6 +78,7 @@ class A_star_search(object):
                 self.propogate_path_improvements(kid)
 
     def draw_path_to_map(self, node):
+
         self.map.grid[node.position[0]][node.position[1]] = 'x'
         if node.parent:
             self.draw_path_to_map(node.parent)
@@ -160,6 +163,7 @@ class Map:
             for y in i:
                 print y,
             print '|'
+        print "\n"
 
 onlyNumbers = re.compile('\d+(?:\.\d+)?')
 
