@@ -29,6 +29,7 @@ class A_star_search(object):
         self.closedlist = []
         self.map = map
         self.map.printMap()
+        self.count = 0
 
 
     def calculate_heuristic(self , position, goal):
@@ -40,27 +41,47 @@ class A_star_search(object):
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             new_node1 = Node((node.position[0]+1, node.position[1]), node)
             successors.append(new_node1)
+
+            if new_node1.position in self.map.walls:
+                new_node1.move_cost=10000
+
         if node.position[1]+1 <= self.map.mapsize[1]-1:
             new_node2 = Node((node.position[0], node.position[1]+1), node)
             successors.append(new_node2)
+
+            if new_node2.position in self.map.walls:
+                new_node2.move_cost=10000
+
         if node.position[0]-1 >= 0:
             new_node3 = Node((node.position[0]-1, node.position[1]), node)
             successors.append(new_node3)
+
+            if new_node3.position in self.map.walls:
+                new_node3.move_cost=10000
+
         if node.position[1]-1 >= 0:
             new_node4 = Node((node.position[0], node.position[1]-1), node)
             successors.append(new_node4)
 
-        for node in successors:
-            if node.position in self.map.walls:
-                node.move_cost=1000
+            if new_node4.position in self.map.walls:
+                new_node4.move_cost=10000
 
         return successors
 
     def unique (self, node):
-        if node in self.closedlist or node in self.openlist:
-            print "not unique"
-            return False
+
+        for closed in self.closedlist:
+            if node.position == closed.position:
+                return False
+
+        for opened in self.openlist:
+            if node.position == opened.position:
+                return False
+
+        self.count += 1
+        #print "penis %d" % (self.count)
         return True
+
 
     def attach_eval(self, child, parent):
         child.parent = parent
@@ -98,15 +119,16 @@ class A_star_search(object):
         #pushes into openlist that is a priorty queue with
         heapq.heappush(self.openlist, initial_node)
         #Agenda loop
-
+        count = 0
         while True:
             if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
-
+            count += 1
+            #print count
             node = heapq.heappop(self.openlist)
             self.map.grid[node.position[0]][node.position[1]] = 'o'
-            self.map.printMap()
+            #self.map.printMap()
             self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
@@ -114,6 +136,8 @@ class A_star_search(object):
                 print "solution found"
                 self.draw_path_to_map(node)
                 self.map.printMap()
+                print count
+                print self.count
                 break
             #adds to the open list
             self.successors = self.generate_successor(node)
