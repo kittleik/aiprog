@@ -23,6 +23,7 @@ class Node(object):
 
 class A_star_search(object):
 
+
     def __init__(self, map):
         self.openlist = []
         heapq.heapify(self.openlist)
@@ -36,6 +37,7 @@ class A_star_search(object):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
     def generate_successor(self, node):
+
         successors = []
 
         if node.position[0]+1 <= self.map.mapsize[0]-1:
@@ -159,6 +161,10 @@ class A_star_search(object):
 
 class Map:
     def __init__(self, width, height, start, goal, walls):
+        self.start = start
+        self.goal = goal
+        self.width = width
+        self.height = height
         #creating empty grid
         self.mapsize =(width,height)
         print self.mapsize
@@ -201,5 +207,13 @@ goal = instructions[2]
 walls = instructions[3:]
 
 theMap = Map(width, height, start, goal, walls)
+
+theMap.printMap()
+node = Node((1,0),None)
+star = A_star_search(theMap)
+star.generate_successor(node)
+#star.run()
+
+
 star = A_star_search(theMap)
 star.run()
