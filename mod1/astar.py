@@ -15,6 +15,7 @@ class Node(object):
         self.kids = []
         self.position = position
 
+    #heapen sorterer etter f verdien til noden
     def __cmp__(self, other):
         return cmp(self.f_cost, other.f_cost)
 
@@ -32,13 +33,13 @@ class A_star_search(object):
         self.map.printMap()
         self.count = 0
         self.pathlength = 0
-
+        self.colored = set()
 
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
-    def generate_successor(self, node):
 
+    def generate_successor(self, node):
         successors = []
 
         if node.position[0]+1 <= self.map.mapsize[0]-1:
@@ -76,7 +77,7 @@ class A_star_search(object):
         return successors
 
     def unique (self, node):
-
+        # kan bruke dictionary her for optimalisering
         for closed in self.closedlist:
             if node.position == closed.position:
                 return False
@@ -84,9 +85,6 @@ class A_star_search(object):
         for opened in self.openlist:
             if node.position == opened.position:
                 return False
-
-
-        self.count +=1
         return True
 
 
@@ -102,7 +100,7 @@ class A_star_search(object):
             if parent.g_cost + kid.move_cost < kid.g_cost:
                 kid.parent = parent
                 kid.g_cost = parent.g_cost + kid.move_cost
-                kif.f_cost = kid.g_cost + kid.h_cost
+                kid.f_cost = kid.g_cost + kid.h_cost
                 self.propogate_path_improvements(kid)
 
     def draw_path_to_map(self, node):
@@ -110,6 +108,49 @@ class A_star_search(object):
         self.map.grid[node.position[0]][node.position[1]] = 'x'
         if node.parent:
             self.draw_path_to_map(node.parent)
+
+    def draw_path_dfs(self,colored):
+        for t in colored:
+            self.map.grid[t[0]][t[1]] = 'x'
+
+    def dfs(self,start):
+        current_node = Node(start,None)
+        self.colored.add(start)
+        successors = self.generate_successor(current_node)
+        for successor in successors:
+            if successor.position in self.colored:
+                print "in colored"
+                continue
+            elif successor.position == self.map.goal:
+                print "found path"
+                self.map.printMap()
+                break
+            else:
+                self.dfs(successor.position)
+            return self.colored
+        print self.colored
+        self.draw_path_dfs(self.colored)
+        self.map.printMap()
+        '''
+        self.goal = self.map.goal
+        initial_node = Node(self.start,None)
+        colored_nodes = set()
+        stack = [start]
+        while True:
+            self.colored_nodes.add(initial_node.position)
+            print initial_node.position
+            successors = self.generate_successor(initial_node)
+            for successor in successors:
+                if successor.position in self.colored_nodes:
+                    continue
+                elif successor.position == self.map.goal:
+                    print self.colored_nodes
+                    break
+                else:
+                    self.dfs(successor.position)
+'''
+
+
 
     def run(self):
         # creating initial node
@@ -135,10 +176,10 @@ class A_star_search(object):
             node = heapq.heappop(self.openlist)
             self.map.grid[node.position[0]][node.position[1]] = 'o'
             #self.map.printMap()
+            self.count += 1
             self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
-                # path = 1
                 print "solution found"
                 self.draw_path_to_map(node)
                 self.map.printMap()
@@ -157,6 +198,7 @@ class A_star_search(object):
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
 
+        print len(self.openlist)
 
 
     #def createState(self, openlist=[]):
@@ -213,7 +255,7 @@ walls = instructions[3:]
 theMap = Map(width, height, start, goal, walls)
 
 #theMap.printMap()
-node = Node((1,0),None)
 
 star = A_star_search(theMap)
-star.run()
+star.dfs(theMap.start)
+#star.run()
