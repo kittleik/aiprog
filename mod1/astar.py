@@ -38,10 +38,32 @@ class A_star_search(object):
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
+    def generate_successor_dfs(self, node):
+        successors = []
+        if node.position[0]+1 <= self.map.mapsize[0]-1:
+            if (node.position[0]+1, node.position[1]) not in self.map.walls:
+                new_node1 = Node((node.position[0]+1, node.position[1]), node)
+                successors.append(new_node1)
+
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0], node.position[1]+1) not in self.map.walls:
+                new_node2 = Node((node.position[0], node.position[1]+1), node)
+                successors.append(new_node2)
+
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                successors.append(new_node3)
+
+        if node.position[1]-1 >= 0:
+            if (node.position[0], node.position[1]-1) not in self.map.walls:
+                new_node4 = Node((node.position[0], node.position[1]-1), node)
+                successors.append(new_node4)
+
+        return successors
 
     def generate_successor(self, node):
         successors = []
-
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             new_node1 = Node((node.position[0]+1, node.position[1]), node)
             successors.append(new_node1)
@@ -116,19 +138,17 @@ class A_star_search(object):
     def dfs(self,start):
         current_node = Node(start,None)
         self.colored.add(start)
-        successors = self.generate_successor(current_node)
+        successors = self.generate_successor_dfs(current_node)
         for successor in successors:
             if successor.position in self.colored:
                 print "in colored"
                 continue
             elif successor.position == self.map.goal:
                 print "found path"
-                self.map.printMap()
                 break
             else:
                 self.dfs(successor.position)
             return self.colored
-        print self.colored
         self.draw_path_dfs(self.colored)
         self.map.printMap()
         '''
@@ -259,3 +279,4 @@ theMap = Map(width, height, start, goal, walls)
 star = A_star_search(theMap)
 star.dfs(theMap.start)
 #star.run()
+
