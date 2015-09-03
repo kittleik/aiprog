@@ -135,40 +135,26 @@ class A_star_search(object):
         for t in colored:
             self.map.grid[t[0]][t[1]] = 'x'
 
-    def dfs(self,start):
-        current_node = Node(start,None)
-        self.colored.add(start)
-        successors = self.generate_successor_dfs(current_node)
-        for successor in successors:
-            if successor.position in self.colored:
-                print "in colored"
-                continue
-            elif successor.position == self.map.goal:
-                print "found path"
+    def dfs(self,start,goal):
+        initial_node = Node(start,None)
+        discovered = set()
+        stack = []
+        stack.append(initial_node)
+        while len(stack) > 0:
+            v = stack.pop()
+            if v.position == goal:
+                print "solution found"
+                self.draw_path_to_map(v)
+                self.map.printMap()
+                print "pathlength: %d" % (self.pathlength)
+                print "number of searchnodes: %d\n" %(self.count)
                 break
-            else:
-                self.dfs(successor.position)
-            return self.colored
-        self.draw_path_dfs(self.colored)
-        self.map.printMap()
-        '''
-        self.goal = self.map.goal
-        initial_node = Node(self.start,None)
-        colored_nodes = set()
-        stack = [start]
-        while True:
-            self.colored_nodes.add(initial_node.position)
-            print initial_node.position
-            successors = self.generate_successor(initial_node)
-            for successor in successors:
-                if successor.position in self.colored_nodes:
-                    continue
-                elif successor.position == self.map.goal:
-                    print self.colored_nodes
-                    break
-                else:
-                    self.dfs(successor.position)
-'''
+            if v.position not in discovered:
+                discovered.add(v.position)
+
+                successors = self.generate_successor_dfs(v)
+                for successor in successors:
+                    stack.append(successor)
 
 
 
@@ -277,6 +263,6 @@ theMap = Map(width, height, start, goal, walls)
 #theMap.printMap()
 
 star = A_star_search(theMap)
-star.dfs(theMap.start)
+star.dfs(theMap.start,theMap.goal)
 #star.run()
 
