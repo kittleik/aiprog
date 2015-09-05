@@ -14,6 +14,7 @@ class Node(object):
         self.parent = parent
         self.kids = []
         self.position = position
+        self.distance = None
 
     #heapen sorterer etter f verdien til noden
     def __cmp__(self, other):
@@ -37,6 +38,34 @@ class A_star_search(object):
 
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
+
+    def generate_successor_bfs(self, node, discovered):
+        successors = []
+        if node.position[0]+1 <= self.map.mapsize[0]-1:
+            if (node.position[0]+1, node.position[1]) not in self.map.walls:
+                if (node.position[0]+1, node.position[1]) not in discovered:
+                    new_node1 = Node((node.position[0]+1, node.position[1]), node)
+                    successors.append(new_node1)
+
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0], node.position[1]+1) not in self.map.walls:
+                if (node.position[0], node.position[1]+1) not in discovered:
+                    new_node2 = Node((node.position[0], node.position[1]+1), node)
+                    successors.append(new_node2)
+
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                if (node.position[0]-1, node.position[1]) not in discovered:
+                    new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                    successors.append(new_node3)
+
+        if node.position[1]-1 >= 0:
+            if (node.position[0], node.position[1]-1) not in self.map.walls:
+                if (node.position[0], node.position[1]-1) not in discovered:
+                    new_node4 = Node((node.position[0], node.position[1]-1), node)
+                    successors.append(new_node4)
+
+        return successors
 
     def generate_successor_dfs(self, node):
         successors = []
@@ -156,6 +185,36 @@ class A_star_search(object):
                 for successor in successors:
                     stack.append(successor)
 
+    def bfs(self, start, goal):
+        queue = Queue.Queue()
+        initial_node = Node(start,None)
+        initial_node.distance = 0
+        queue.put(initial_node)
+        discovered = set()
+
+        while True:
+            if queue.empty():
+                print "queue empty"
+                break
+            u = queue.get()
+            self.map.grid[u.position[0]][u.position[1]] = 'o'
+            if u.position == goal:
+                #display path, break the while loop
+                print "solution found"
+                self.draw_path_to_map(u)
+                self.map.printMap()
+                print "pathlength: %d" % (self.pathlength)
+                print "number of searchnodes: %d\n" %(self.count)
+                break
+            if u.position not in discovered:
+                discovered.add(u.position)
+            successors = self.generate_successor_bfs(u,discovered)
+            for successor in successors:
+                if successor.distance == None:
+                    successor.distance = u.distance + 1
+                    successor.parent = u
+                    queue.put(successor)
+                    discovered.add(u.position)
 
 
     def run(self):
@@ -263,6 +322,7 @@ theMap = Map(width, height, start, goal, walls)
 #theMap.printMap()
 
 star = A_star_search(theMap)
-star.dfs(theMap.start,theMap.goal)
+#star.dfs(theMap.start,theMap.goal)
+star.bfs(theMap.start,theMap.goal)
 #star.run()
 
