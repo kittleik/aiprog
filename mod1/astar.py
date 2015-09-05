@@ -196,25 +196,24 @@ class A_star_search(object):
             if queue.empty():
                 print "queue empty"
                 break
-            u = queue.get()
-            self.map.grid[u.position[0]][u.position[1]] = 'o'
-            if u.position == goal:
-                #display path, break the while loop
+            next_node = queue.get()
+            self.map.grid[next_node.position[0]][next_node.position[1]] = 'o'
+            if next_node.position == goal:
                 print "solution found"
-                self.draw_path_to_map(u)
+                self.draw_path_to_map(next_node)
                 self.map.printMap()
                 print "pathlength: %d" % (self.pathlength)
                 print "number of searchnodes: %d\n" %(self.count)
                 break
-            if u.position not in discovered:
-                discovered.add(u.position)
-            successors = self.generate_successor_bfs(u,discovered)
+            if next_node.position not in discovered:
+                discovered.add(next_node.position)
+            successors = self.generate_successor_bfs(next_node,discovered)
             for successor in successors:
                 if successor.distance == None:
-                    successor.distance = u.distance + 1
-                    successor.parent = u
+                    successor.distance = next_node.distance + 1
+                    successor.parent = next_node
                     queue.put(successor)
-                    discovered.add(u.position)
+                    discovered.add(successor.position)
 
 
     def run(self):
