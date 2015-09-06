@@ -323,9 +323,29 @@ class PathFinder(wx.Frame):
         # create a panel
         wx.Frame.__init__(self, parent, id,"PathFinder",size=(500,500))
         panel = wx.Panel(self)
+        button = wx.Button(panel, label="Start", pos=(0,400),size=(60,30))
+        self.Bind(wx.EVT_BUTTON, self.closebutton, button)
         self.SetBackgroundColour("white")
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+        status = self.CreateStatusBar()
+        menubar = wx.MenuBar()
+        first = wx.Menu()
+        second = wx.Menu()
+        first.Append(wx.NewId(), "Map1", "10x10")
+        first.Append(wx.NewId(), "Map2", "20x20")
+        first.Append(wx.NewId(), "Map3", "20x20")
+        first.Append(wx.NewId(), "Map4", "10x10")
+        first.Append(wx.NewId(), "Map5", "20x20")
+        menubar.Append(first,"File")
+        menubar.Append(second,"Edit")
+        self.SetMenuBar(menubar)
+
         self.map = Map(width, height, start, goal, walls)
+
+    def closebutton(self,event):
+        self.Close(True)
+
 
     def OnPaint(self, evt):
         dc = wx.PaintDC(self)
@@ -366,44 +386,6 @@ if __name__ == '__main__':
     frame=PathFinder(parent=None,id=-1)
     frame.Show()
     app.MainLoop()
-'''
-app = wx.App(False)
-# create a window/frame, no parent, -1 is default ID
-frame = wx.Frame(None, -1, "Drawing A Rectangle...", size = (500, 500))
-# call the derived class, -1 is default ID
-MyPanel(frame,-1)
-# show the frame
-frame.Show(True)
-# start the event loop
-app.MainLoop()
-
-class PathFinder(wx.Frame):
-    def __init__(self,parent,id):
-        wx.Frame.__init__(self,parent,id,'Path Finder',size=(500,500))
-        #panel = wx.Panel(self)
-        self.SetBackgroundColour("white")
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
-
-        status = self.CreateStatusBar()
-        menubar = wx.MenuBar()
-        first = wx.Menu()
-        second = wx.Menu()
-        first.Append(wx.NewId(), "New window", "This is a new window")
-        first.Append(wx.NewId(), "Open..", "This will open a new window")
-        menubar.Append(first,"File")
-        menubar.Append(second,"Edit")
-        self.SetMenuBar(menubar)
-
-
-
-
-
-if __name__ == '__main__':
-    app=wx.App(False)
-    frame=PathFinder(parent=None,id=-1)
-    frame.Show()
-    app.MainLoop()
-'''
 
 theMap = Map(width, height, start, goal, walls)
 
