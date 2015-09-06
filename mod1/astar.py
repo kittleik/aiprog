@@ -329,9 +329,15 @@ topFrame.pack()
 bottomFrame = Frame(root)
 bottomFrame.pack(side=BOTTOM)
 
-button1 = Button(bottomFrame, text="start", fg="red")
-button1.pack()
 w = Canvas(topFrame, width=500, height=500)
+def callback():
+    print "hei"
+    x = random.randint(0,19)
+    y = random.randint(0,19)
+    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+
+button1 = Button(bottomFrame, text="start", fg="red", command=callback)
+button1.pack()
 
 x = 0
 y = 0
