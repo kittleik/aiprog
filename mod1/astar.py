@@ -1,6 +1,8 @@
 import sys
 import re
 import heapq, Queue
+import wx
+import wx.grid
 
 inFile = sys.argv[1]
 
@@ -23,8 +25,8 @@ class Node(object):
     def appendkid(self, node):
         self.kids.append(node)
 
-class A_star_search(object):
 
+class Search(object):
 
     def __init__(self, map):
         self.openlist = []
@@ -91,7 +93,7 @@ class A_star_search(object):
 
         return successors
 
-    def generate_successor(self, node):
+    def generate_successor_astar(self, node):
         successors = []
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             new_node1 = Node((node.position[0]+1, node.position[1]), node)
@@ -180,7 +182,6 @@ class A_star_search(object):
                 break
             if v.position not in discovered:
                 discovered.add(v.position)
-
                 successors = self.generate_successor_dfs(v)
                 for successor in successors:
                     stack.append(successor)
@@ -194,7 +195,6 @@ class A_star_search(object):
 
         while True:
             if queue.empty():
-                print "queue empty"
                 break
             next_node = queue.get()
             self.map.grid[next_node.position[0]][next_node.position[1]] = 'o'
@@ -216,7 +216,7 @@ class A_star_search(object):
                     discovered.add(successor.position)
 
 
-    def run(self):
+    def a_star(self):
         # creating initial node
         self.start = self.map.start
         print "starting position is %s" % (self.start,)
@@ -251,7 +251,7 @@ class A_star_search(object):
                 print "number of searchnodes: %d\n" %(self.count)
                 break
             #adds to the open list
-            self.successors = self.generate_successor(node)
+            self.successors = self.generate_successor_astar(node)
             for successor in self.successors:
                 node.appendkid(successor)
                 if self.unique(successor):
@@ -277,7 +277,6 @@ class Map:
         self.height = height
         #creating empty grid
         self.mapsize =(width,height)
-        print self.mapsize
         self.grid = [['.' for i in range(width)] for i in range(height)]
         #adding start, goal and walls
         self.goal = tuple(goal)
@@ -316,11 +315,101 @@ start = instructions[1]
 goal = instructions[2]
 walls = instructions[3:]
 
+#------------------WXPYTHON-GRAPHICS-----------------------------------------------
+
+class PathFinder(wx.Frame):
+    """ class MyPanel creates a panel to draw on, inherits wx.Panel """
+    def __init__(self, parent, id):
+        # create a panel
+        wx.Frame.__init__(self, parent, id,"PathFinder",size=(500,500))
+        panel = wx.Panel(self)
+        self.SetBackgroundColour("white")
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.map = Map(width, height, start, goal, walls)
+
+    def OnPaint(self, evt):
+        dc = wx.PaintDC(self)
+        x = 0
+        y = 0
+        max_y = 380
+        if self.map.width == 20:
+            max_y = 380
+        if self.map.width == 10:
+            max_y = 180
+        for i in self.map.grid:
+            for j in i:
+                if j == '#':
+                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
+                    dc.SetBrush(wx.Brush("black", wx.SOLID))
+                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
+                    y += 1
+                elif j == 'S':
+                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
+                    dc.SetBrush(wx.Brush("green", wx.SOLID))
+                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
+                    y += 1
+                elif j == 'G':
+                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
+                    dc.SetBrush(wx.Brush("red", wx.SOLID))
+                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
+                    y += 1
+                else:
+                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
+                    dc.SetBrush(wx.Brush("white", wx.SOLID))
+                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
+                    y += 1
+            y = 0
+            x += 1
+
+if __name__ == '__main__':
+    app=wx.App(False)
+    frame=PathFinder(parent=None,id=-1)
+    frame.Show()
+    app.MainLoop()
+'''
+app = wx.App(False)
+# create a window/frame, no parent, -1 is default ID
+frame = wx.Frame(None, -1, "Drawing A Rectangle...", size = (500, 500))
+# call the derived class, -1 is default ID
+MyPanel(frame,-1)
+# show the frame
+frame.Show(True)
+# start the event loop
+app.MainLoop()
+
+class PathFinder(wx.Frame):
+    def __init__(self,parent,id):
+        wx.Frame.__init__(self,parent,id,'Path Finder',size=(500,500))
+        #panel = wx.Panel(self)
+        self.SetBackgroundColour("white")
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+        status = self.CreateStatusBar()
+        menubar = wx.MenuBar()
+        first = wx.Menu()
+        second = wx.Menu()
+        first.Append(wx.NewId(), "New window", "This is a new window")
+        first.Append(wx.NewId(), "Open..", "This will open a new window")
+        menubar.Append(first,"File")
+        menubar.Append(second,"Edit")
+        self.SetMenuBar(menubar)
+
+
+
+
+
+if __name__ == '__main__':
+    app=wx.App(False)
+    frame=PathFinder(parent=None,id=-1)
+    frame.Show()
+    app.MainLoop()
+'''
+
 theMap = Map(width, height, start, goal, walls)
 
 #theMap.printMap()
 
-star = A_star_search(theMap)
+star = Search(theMap)
 #star.dfs(theMap.start,theMap.goal)
 star.bfs(theMap.start,theMap.goal)
 #star.run()
