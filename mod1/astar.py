@@ -3,6 +3,9 @@ import re
 import heapq, Queue
 import wx
 import wx.grid
+import random
+from Tkinter import *
+import time
 
 inFile = sys.argv[1]
 
@@ -315,84 +318,90 @@ start = instructions[1]
 goal = instructions[2]
 walls = instructions[3:]
 
-#------------------WXPYTHON-GRAPHICS-----------------------------------------------
-
-class PathFinder(wx.Frame):
-    """ class MyPanel creates a panel to draw on, inherits wx.Panel """
-    def __init__(self, parent, id):
-        # create a panel
-        wx.Frame.__init__(self, parent, id,"PathFinder",size=(500,500))
-        panel = wx.Panel(self)
-        button = wx.Button(panel, label="Start", pos=(0,400),size=(60,30))
-        self.Bind(wx.EVT_BUTTON, self.closebutton, button)
-        self.SetBackgroundColour("white")
-        self.Bind(wx.EVT_PAINT, self.OnPaint)
-
-        status = self.CreateStatusBar()
-        menubar = wx.MenuBar()
-        first = wx.Menu()
-        second = wx.Menu()
-        first.Append(wx.NewId(), "Map1", "10x10")
-        first.Append(wx.NewId(), "Map2", "20x20")
-        first.Append(wx.NewId(), "Map3", "20x20")
-        first.Append(wx.NewId(), "Map4", "10x10")
-        first.Append(wx.NewId(), "Map5", "20x20")
-        menubar.Append(first,"File")
-        menubar.Append(second,"Edit")
-        self.SetMenuBar(menubar)
-
-        self.map = Map(width, height, start, goal, walls)
-
-    def closebutton(self,event):
-        self.Close(True)
-
-
-    def OnPaint(self, evt):
-        dc = wx.PaintDC(self)
-        x = 0
-        y = 0
-        max_y = 380
-        if self.map.width == 20:
-            max_y = 380
-        if self.map.width == 10:
-            max_y = 180
-        for i in self.map.grid:
-            for j in i:
-                if j == '#':
-                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
-                    dc.SetBrush(wx.Brush("black", wx.SOLID))
-                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
-                    y += 1
-                elif j == 'S':
-                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
-                    dc.SetBrush(wx.Brush("green", wx.SOLID))
-                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
-                    y += 1
-                elif j == 'G':
-                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
-                    dc.SetBrush(wx.Brush("red", wx.SOLID))
-                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
-                    y += 1
-                else:
-                    dc.SetPen(wx.Pen('#4c4c4c', 1, wx.SOLID))
-                    dc.SetBrush(wx.Brush("white", wx.SOLID))
-                    dc.DrawRectangle( x*20, max_y - (y * 20), 20, 20)
-                    y += 1
-            y = 0
-            x += 1
-
-if __name__ == '__main__':
-    app=wx.App(False)
-    frame=PathFinder(parent=None,id=-1)
-    frame.Show()
-    app.MainLoop()
+# ------Tkinter-----------
 
 theMap = Map(width, height, start, goal, walls)
 
-#theMap.printMap()
+root = Tk()
+
+topFrame = Frame(root)
+topFrame.pack()
+bottomFrame = Frame(root)
+bottomFrame.pack(side=BOTTOM)
+
+button1 = Button(bottomFrame, text="start", fg="red")
+button1.pack()
+w = Canvas(topFrame, width=500, height=500)
+
+x = 0
+y = 0
+max_y = 380
+for i in theMap.grid:
+    for j in i:
+        if j == '#':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+            y += 1
+        elif j == 'S':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+            y += 1
+        elif j == 'G':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+            y += 1
+        elif j == 'x':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+            y += 1
+        elif j == 'o':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+            y += 1
+        else:
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+            y += 1
+    y = 0
+    x += 1
+w.pack()
 
 star = Search(theMap)
 #star.dfs(theMap.start,theMap.goal)
-star.bfs(theMap.start,theMap.goal)
+#star.bfs(theMap.start,theMap.goal)
+star.a_star()
+
+
+x = 0
+y = 0
+max_y = 380
+for i in theMap.grid:
+    for j in i:
+        if j == '#':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+            y += 1
+        elif j == 'S':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+            y += 1
+        elif j == 'G':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+            y += 1
+        elif j == 'x':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+            y += 1
+        elif j == 'o':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+            y += 1
+        else:
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+            y += 1
+    y = 0
+    x += 1
+w.pack()
+
+
+root.mainloop()
+
+
+
+#theMap.printMap()
+
+#star = Search(theMap)
+#star.dfs(theMap.start,theMap.goal)
+#star.bfs(theMap.start,theMap.goal)
 #star.run()
 
