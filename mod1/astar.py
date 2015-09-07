@@ -121,6 +121,7 @@ class Search(object):
             #self.count += 1
 
             if new_node3.position in self.map.walls:
+
                 new_node3.move_cost=10000
 
         if node.position[1]-1 >= 0:
