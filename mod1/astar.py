@@ -40,6 +40,7 @@ class Search(object):
         self.count = 0
         self.pathlength = 0
         self.colored = set()
+        self.rekke = []
 
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
@@ -189,12 +190,14 @@ class Search(object):
                 for successor in successors:
                     stack.append(successor)
 
+
     def bfs(self, start, goal):
         queue = Queue.Queue()
         initial_node = Node(start,None)
         initial_node.distance = 0
         queue.put(initial_node)
         discovered = set()
+        rekke = []
 
         while True:
             if queue.empty():
@@ -210,6 +213,7 @@ class Search(object):
                 break
             if next_node.position not in discovered:
                 discovered.add(next_node.position)
+                self.rekke.append(next_node.position)
             successors = self.generate_successor_bfs(next_node,discovered)
             for successor in successors:
                 if successor.distance == None:
@@ -217,7 +221,7 @@ class Search(object):
                     successor.parent = next_node
                     queue.put(successor)
                     discovered.add(successor.position)
-
+                    self.rekke.append(next_node.position)
 
     def a_star(self):
         # creating initial node
@@ -318,9 +322,9 @@ start = instructions[1]
 goal = instructions[2]
 walls = instructions[3:]
 
-# ------Tkinter-----------
-
 theMap = Map(width, height, start, goal, walls)
+
+# ------Tkinter-----------
 
 root = Tk()
 
@@ -330,78 +334,64 @@ bottomFrame = Frame(root)
 bottomFrame.pack(side=BOTTOM)
 
 w = Canvas(topFrame, width=500, height=500)
+paint_list = []
 def callback():
-    print "hei"
     x = random.randint(0,19)
     y = random.randint(0,19)
     w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+    #root.after(1000, callback)
 
-button1 = Button(bottomFrame, text="start", fg="red", command=callback)
+def start():
+    star = Search(theMap)
+    star.bfs(theMap.start,theMap.goal)
+    paint_list = star.rekke
+    while len(paint_list) > 0:
+        square = paint_list.pop(0)
+        x = square[0]
+        y = square[1]
+        w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+        root.update()
+
+button1 = Button(bottomFrame, text="start", fg="red", command=start)
 button1.pack()
 
-x = 0
-y = 0
-max_y = 380
-for i in theMap.grid:
-    for j in i:
-        if j == '#':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
-            y += 1
-        elif j == 'S':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
-            y += 1
-        elif j == 'G':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
-            y += 1
-        elif j == 'x':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
-            y += 1
-        elif j == 'o':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
-            y += 1
-        else:
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
-            y += 1
+def paintGUI(grid):
+    x = 0
     y = 0
-    x += 1
-w.pack()
+    max_y = 380
 
-star = Search(theMap)
+    for i in grid:
+        for j in i:
+            if j == '#':
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+                y += 1
+            elif j == 'S':
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+                y += 1
+            elif j == 'G':
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+                y += 1
+            elif j == 'x':
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+                y += 1
+            elif j == 'o':
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+                y += 1
+            else:
+                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+                y += 1
+        y = 0
+        x += 1
+    w.pack()
+
+paintGUI(theMap.grid)
+
+#star = Search(theMap)
 #star.dfs(theMap.start,theMap.goal)
 #star.bfs(theMap.start,theMap.goal)
-star.a_star()
-
-
-x = 0
-y = 0
-max_y = 380
-for i in theMap.grid:
-    for j in i:
-        if j == '#':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
-            y += 1
-        elif j == 'S':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
-            y += 1
-        elif j == 'G':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
-            y += 1
-        elif j == 'x':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
-            y += 1
-        elif j == 'o':
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
-            y += 1
-        else:
-            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
-            y += 1
-    y = 0
-    x += 1
-w.pack()
-
+#star.a_star()
 
 root.mainloop()
-
 
 
 #theMap.printMap()
