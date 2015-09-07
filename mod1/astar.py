@@ -1,6 +1,11 @@
 import sys
 import re
 import heapq, Queue
+import wx
+import wx.grid
+import random
+from Tkinter import *
+import time
 
 inFile = sys.argv[1]
 
@@ -14,15 +19,17 @@ class Node(object):
         self.parent = parent
         self.kids = []
         self.position = position
+        self.distance = None
 
+    #heapen sorterer etter f verdien til noden
     def __cmp__(self, other):
         return cmp(self.f_cost, other.f_cost)
 
     def appendkid(self, node):
         self.kids.append(node)
 
-class A_star_search(object):
 
+class Search(object):
 
     def __init__(self, map):
         self.openlist = []
@@ -32,15 +39,65 @@ class A_star_search(object):
         self.map.printMap()
         self.count = 0
         self.pathlength = 0
-
+        self.colored = set()
 
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
-    def generate_successor(self, node):
-
+    def generate_successor_bfs(self, node, discovered):
         successors = []
+        if node.position[0]+1 <= self.map.mapsize[0]-1:
+            if (node.position[0]+1, node.position[1]) not in self.map.walls:
+                if (node.position[0]+1, node.position[1]) not in discovered:
+                    new_node1 = Node((node.position[0]+1, node.position[1]), node)
+                    successors.append(new_node1)
 
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0], node.position[1]+1) not in self.map.walls:
+                if (node.position[0], node.position[1]+1) not in discovered:
+                    new_node2 = Node((node.position[0], node.position[1]+1), node)
+                    successors.append(new_node2)
+
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                if (node.position[0]-1, node.position[1]) not in discovered:
+                    new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                    successors.append(new_node3)
+
+        if node.position[1]-1 >= 0:
+            if (node.position[0], node.position[1]-1) not in self.map.walls:
+                if (node.position[0], node.position[1]-1) not in discovered:
+                    new_node4 = Node((node.position[0], node.position[1]-1), node)
+                    successors.append(new_node4)
+
+        return successors
+
+    def generate_successor_dfs(self, node):
+        successors = []
+        if node.position[0]+1 <= self.map.mapsize[0]-1:
+            if (node.position[0]+1, node.position[1]) not in self.map.walls:
+                new_node1 = Node((node.position[0]+1, node.position[1]), node)
+                successors.append(new_node1)
+
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0], node.position[1]+1) not in self.map.walls:
+                new_node2 = Node((node.position[0], node.position[1]+1), node)
+                successors.append(new_node2)
+
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                successors.append(new_node3)
+
+        if node.position[1]-1 >= 0:
+            if (node.position[0], node.position[1]-1) not in self.map.walls:
+                new_node4 = Node((node.position[0], node.position[1]-1), node)
+                successors.append(new_node4)
+
+        return successors
+
+    def generate_successor_astar(self, node):
+        successors = []
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             new_node1 = Node((node.position[0]+1, node.position[1]), node)
             successors.append(new_node1)
@@ -77,7 +134,7 @@ class A_star_search(object):
         return successors
 
     def unique (self, node):
-
+        # kan bruke dictionary her for optimalisering
         for closed in self.closedlist:
             if node.position == closed.position:
                 return False
@@ -85,9 +142,6 @@ class A_star_search(object):
         for opened in self.openlist:
             if node.position == opened.position:
                 return False
-
-
-        self.count +=1
         return True
 
 
@@ -103,7 +157,7 @@ class A_star_search(object):
             if parent.g_cost + kid.move_cost < kid.g_cost:
                 kid.parent = parent
                 kid.g_cost = parent.g_cost + kid.move_cost
-                kif.f_cost = kid.g_cost + kid.h_cost
+                kid.f_cost = kid.g_cost + kid.h_cost
                 self.propogate_path_improvements(kid)
 
     def draw_path_to_map(self, node):
@@ -112,7 +166,61 @@ class A_star_search(object):
         if node.parent:
             self.draw_path_to_map(node.parent)
 
-    def run(self):
+    def draw_path_dfs(self,colored):
+        for t in colored:
+            self.map.grid[t[0]][t[1]] = 'x'
+
+    def dfs(self,start,goal):
+        initial_node = Node(start,None)
+        discovered = set()
+        stack = []
+        stack.append(initial_node)
+        while len(stack) > 0:
+            v = stack.pop()
+            if v.position == goal:
+                print "solution found"
+                self.draw_path_to_map(v)
+                self.map.printMap()
+                print "pathlength: %d" % (self.pathlength)
+                print "number of searchnodes: %d\n" %(self.count)
+                break
+            if v.position not in discovered:
+                discovered.add(v.position)
+                successors = self.generate_successor_dfs(v)
+                for successor in successors:
+                    stack.append(successor)
+
+    def bfs(self, start, goal):
+        queue = Queue.Queue()
+        initial_node = Node(start,None)
+        initial_node.distance = 0
+        queue.put(initial_node)
+        discovered = set()
+
+        while True:
+            if queue.empty():
+                break
+            next_node = queue.get()
+            self.map.grid[next_node.position[0]][next_node.position[1]] = 'o'
+            if next_node.position == goal:
+                print "solution found"
+                self.draw_path_to_map(next_node)
+                self.map.printMap()
+                print "pathlength: %d" % (self.pathlength)
+                print "number of searchnodes: %d\n" %(self.count)
+                break
+            if next_node.position not in discovered:
+                discovered.add(next_node.position)
+            successors = self.generate_successor_bfs(next_node,discovered)
+            for successor in successors:
+                if successor.distance == None:
+                    successor.distance = next_node.distance + 1
+                    successor.parent = next_node
+                    queue.put(successor)
+                    discovered.add(successor.position)
+
+
+    def a_star(self):
         # creating initial node
         self.start = self.map.start
         print "starting position is %s" % (self.start,)
@@ -136,10 +244,10 @@ class A_star_search(object):
             node = heapq.heappop(self.openlist)
             self.map.grid[node.position[0]][node.position[1]] = 'o'
             #self.map.printMap()
+            self.count += 1
             self.closedlist.append(node)
             if node.position == self.goal:
                 #display path, break the while loop
-                # path = 1
                 print "solution found"
                 self.draw_path_to_map(node)
                 self.map.printMap()
@@ -147,7 +255,7 @@ class A_star_search(object):
                 print "number of searchnodes: %d\n" %(self.count)
                 break
             #adds to the open list
-            self.successors = self.generate_successor(node)
+            self.successors = self.generate_successor_astar(node)
             for successor in self.successors:
                 node.appendkid(successor)
                 if self.unique(successor):
@@ -158,6 +266,7 @@ class A_star_search(object):
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
 
+        print len(self.openlist)
 
 
     #def createState(self, openlist=[]):
@@ -172,7 +281,6 @@ class Map:
         self.height = height
         #creating empty grid
         self.mapsize =(width,height)
-        print self.mapsize
         self.grid = [['.' for i in range(width)] for i in range(height)]
         #adding start, goal and walls
         self.goal = tuple(goal)
@@ -211,10 +319,96 @@ start = instructions[1]
 goal = instructions[2]
 walls = instructions[3:]
 
+# ------Tkinter-----------
+
 theMap = Map(width, height, start, goal, walls)
 
-#theMap.printMap()
-node = Node((1,0),None)
+root = Tk()
 
-star = A_star_search(theMap)
-star.run()
+topFrame = Frame(root)
+topFrame.pack()
+bottomFrame = Frame(root)
+bottomFrame.pack(side=BOTTOM)
+
+w = Canvas(topFrame, width=500, height=500)
+def callback():
+    print "hei"
+    x = random.randint(0,19)
+    y = random.randint(0,19)
+    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+
+button1 = Button(bottomFrame, text="start", fg="red", command=callback)
+button1.pack()
+
+x = 0
+y = 0
+max_y = 380
+for i in theMap.grid:
+    for j in i:
+        if j == '#':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+            y += 1
+        elif j == 'S':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+            y += 1
+        elif j == 'G':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+            y += 1
+        elif j == 'x':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+            y += 1
+        elif j == 'o':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+            y += 1
+        else:
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+            y += 1
+    y = 0
+    x += 1
+w.pack()
+
+star = Search(theMap)
+#star.dfs(theMap.start,theMap.goal)
+#star.bfs(theMap.start,theMap.goal)
+star.a_star()
+
+
+x = 0
+y = 0
+max_y = 380
+for i in theMap.grid:
+    for j in i:
+        if j == '#':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+            y += 1
+        elif j == 'S':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+            y += 1
+        elif j == 'G':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+            y += 1
+        elif j == 'x':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+            y += 1
+        elif j == 'o':
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+            y += 1
+        else:
+            w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+            y += 1
+    y = 0
+    x += 1
+w.pack()
+
+
+root.mainloop()
+
+
+
+#theMap.printMap()
+
+#star = Search(theMap)
+#star.dfs(theMap.start,theMap.goal)
+#star.bfs(theMap.start,theMap.goal)
+#star.run()
+
