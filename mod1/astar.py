@@ -19,7 +19,6 @@ class Node(object):
         self.parent = parent
         self.kids = []
         self.position = position
-        self.distance = None
 
     #heapen sorterer etter f verdien til noden
     def __cmp__(self, other):
@@ -40,7 +39,7 @@ class Search(object):
         self.count = 0
         self.pathlength = 0
         self.colored = set()
-        self.rekke = []
+        self.path = []
 
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
@@ -51,24 +50,28 @@ class Search(object):
             if (node.position[0]+1, node.position[1]) not in self.map.walls:
                 if (node.position[0]+1, node.position[1]) not in discovered:
                     new_node1 = Node((node.position[0]+1, node.position[1]), node)
+                    new_node1.parent = node
                     successors.append(new_node1)
 
         if node.position[1]+1 <= self.map.mapsize[1]-1:
             if (node.position[0], node.position[1]+1) not in self.map.walls:
                 if (node.position[0], node.position[1]+1) not in discovered:
                     new_node2 = Node((node.position[0], node.position[1]+1), node)
+                    new_node2.parent = node
                     successors.append(new_node2)
 
         if node.position[0]-1 >= 0:
             if (node.position[0]-1, node.position[1]) not in self.map.walls:
                 if (node.position[0]-1, node.position[1]) not in discovered:
                     new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                    new_node3.parent = node
                     successors.append(new_node3)
 
         if node.position[1]-1 >= 0:
             if (node.position[0], node.position[1]-1) not in self.map.walls:
                 if (node.position[0], node.position[1]-1) not in discovered:
                     new_node4 = Node((node.position[0], node.position[1]-1), node)
+                    new_node4.parent = node
                     successors.append(new_node4)
 
         return successors
@@ -135,7 +138,6 @@ class Search(object):
         return successors
 
     def unique (self, node):
-        # kan bruke dictionary her for optimalisering
         for closed in self.closedlist:
             if node.position == closed.position:
                 return False
@@ -164,6 +166,7 @@ class Search(object):
     def draw_path_to_map(self, node):
         self.pathlength += 1
         self.map.grid[node.position[0]][node.position[1]] = 'x'
+        self.path.append(node)
         if node.parent:
             self.draw_path_to_map(node.parent)
 
@@ -195,34 +198,30 @@ class Search(object):
     def bfs(self, start, goal):
         queue = Queue.Queue()
         initial_node = Node(start,None)
-        initial_node.distance = 0
         queue.put(initial_node)
         discovered = set()
-        rekke = []
 
         while True:
             if queue.empty():
                 break
             next_node = queue.get()
-            self.map.grid[next_node.position[0]][next_node.position[1]] = 'o'
             if next_node.position == goal:
                 print "solution found"
                 self.draw_path_to_map(next_node)
+                paintPath(self.path)
                 self.map.printMap()
-                print "pathlength: %d" % (self.pathlength)
-                print "number of searchnodes: %d\n" %(self.count)
                 break
             if next_node.position not in discovered:
                 discovered.add(next_node.position)
-                self.rekke.append(next_node.position)
+
             successors = self.generate_successor_bfs(next_node,discovered)
+
             for successor in successors:
-                if successor.distance == None:
-                    successor.distance = next_node.distance + 1
-                    successor.parent = next_node
-                    queue.put(successor)
-                    discovered.add(successor.position)
-                    self.rekke.append(next_node.position)
+                successor.parent = next_node
+                queue.put(successor)
+                discovered.add(successor.position)
+                paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
+                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
 
     def a_star(self):
         # creating initial node
@@ -325,6 +324,8 @@ walls = instructions[3:]
 
 theMap = Map(width, height, start, goal, walls)
 
+
+
 # ------Tkinter-----------
 
 root = Tk()
@@ -335,31 +336,31 @@ bottomFrame = Frame(root)
 bottomFrame.pack(side=BOTTOM)
 
 w = Canvas(topFrame, width=500, height=500)
-paint_list = []
-def callback():
-    x = random.randint(0,19)
-    y = random.randint(0,19)
-    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
-    #root.after(1000, callback)
+
+def paintSingleSquare(x,y,the_map,fill):
+    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
+    time.sleep(0.01)
+    root.update()
+def paintPath(path_list):
+    for node in reversed(path_list):
+        x = node.position[0]
+        y = node.position[1]
+        paintSingleSquare(x,y,theMap,"red")
+        time.sleep(0.01)
+        root.update()
+
+
 
 def start():
     star = Search(theMap)
     star.bfs(theMap.start,theMap.goal)
-    paint_list = star.rekke
-    while len(paint_list) > 0:
-        square = paint_list.pop(0)
-        x = square[0]
-        y = square[1]
-        w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
-        root.update()
 
 button1 = Button(bottomFrame, text="start", fg="red", command=start)
 button1.pack()
 
-def paintGUI(grid):
+def paintMap(grid):
     x = 0
     y = 0
-    max_y = 380
 
     for i in grid:
         for j in i:
@@ -385,13 +386,7 @@ def paintGUI(grid):
         x += 1
     w.pack()
 
-paintGUI(theMap.grid)
-
-#star = Search(theMap)
-#star.dfs(theMap.start,theMap.goal)
-#star.bfs(theMap.start,theMap.goal)
-#star.a_star()
-
+paintMap(theMap.grid)
 root.mainloop()
 
 
