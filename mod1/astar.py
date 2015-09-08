@@ -1,8 +1,6 @@
 import sys
 import re
 import heapq, Queue
-import wx
-import wx.grid
 from random import shuffle
 from Tkinter import *
 import time
@@ -208,6 +206,7 @@ class Search(object):
                 discovered.add(next_node.position)
 
             successors = self.generate_successor_bfs(next_node,discovered)
+            shuffle(successors)
 
             for successor in successors:
                 successor.parent = next_node
@@ -255,6 +254,7 @@ class Search(object):
             #adds to the open list
 
             self.successors = self.generate_successor_astar(node)
+            shuffle(self.successors)
             for successor in self.successors:
                 node.appendkid(successor)
                 if self.unique(successor):
@@ -266,9 +266,6 @@ class Search(object):
                         propagate_path_improvements(successor)
                 paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
                 paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
-
-
-    #def createState(self, openlist=[]):
 
 
 
@@ -307,6 +304,8 @@ class Map:
             print '|'
         print "\n"
 
+#==================RUNNING PROGRAM=======================================
+
 onlyNumbers = re.compile('\d+(?:\.\d+)?')
 
 instructions = [onlyNumbers.findall(line) for line in open(inFile, 'r')]
@@ -319,18 +318,30 @@ goal = instructions[2]
 walls = instructions[3:]
 
 theMap = Map(width, height, start, goal, walls)
-
-
+theMap_copy = Map(width, height, start, goal, walls)
 
 # ------Tkinter-----------
 
 root = Tk()
-def startDFS():
-    return True
-def startBFS():
-    return True
-def startAStar():
-    return True
+mode = "dfs"
+
+def chooseMap():
+    print "Ma lage dette for a endre map"
+
+def switchMode(string):
+    global mode
+    if string == "dfs":
+        mode = "dfs"
+    elif string == "bfs":
+        mode = "bfs"
+    elif string == "astar":
+        mode = "astar"
+    else:
+        print "not a mode"
+
+def reset():
+    global theMap_copy
+    paintMap(theMap_copy.grid)
 
 topFrame = Frame(root)
 topFrame.pack()
@@ -341,14 +352,24 @@ bottomFrame.pack(side=BOTTOM)
 menu = Menu(root)
 root.config(menu=menu)
 
-subMenu = Menu(menu)
-menu.add_cascade(label="Algorithms", menu=subMenu)
-subMenu.add_command(label="Depth first search", command=startDFS)
-subMenu.add_command(label="Breadth first search", command=startBFS)
-subMenu.add_command(label="A star", command=startAStar)
+algorithm_Menu = Menu(menu)
+menu.add_cascade(label="Algorithms", menu=algorithm_Menu)
+algorithm_Menu.add_command(label="Depth first search", command=lambda *args: switchMode("dfs"))
+algorithm_Menu.add_command(label="Breadth first search", command=lambda *args: switchMode("bfs"))
+algorithm_Menu.add_command(label="A star", command=lambda *args: switchMode("astar"))
+algorithm_Menu.add_command(label="Reset", command=reset)
 #subMenu.add_separator()
+map_Menu = Menu(menu)
+menu.add_cascade(label="Maps", menu=map_Menu)
+map_Menu.add_command(label="Map1", command=chooseMap)
+map_Menu.add_command(label="Map2", command=chooseMap)
+map_Menu.add_command(label="Map3", command=chooseMap)
+map_Menu.add_command(label="Map4", command=chooseMap)
+map_Menu.add_command(label="Map5", command=chooseMap)
+map_Menu.add_command(label="Map6", command=chooseMap)
 
-w = Canvas(topFrame, width=500, height=500)
+#---------Paint map----------
+w = Canvas(topFrame, width=400, height=420)
 
 def paintSingleSquare(x,y,the_map,fill):
     w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
@@ -362,17 +383,6 @@ def paintPath(path_list):
         paintSingleSquare(x,y,theMap,"red")
         time.sleep(0.01)
         root.update()
-
-
-
-def start():
-    star = Search(theMap)
-    #star.bfs(theMap.start,theMap.goal)
-    #star.dfs(theMap.start,theMap.goal)
-    star.a_star()
-
-button1 = Button(bottomFrame, text="start", fg="red", command=start)
-button1.pack()
 
 def paintMap(grid):
     x = 0
@@ -402,14 +412,21 @@ def paintMap(grid):
         x += 1
     w.pack()
 
+#---------Buttons------------
+def start():
+    search = Search(theMap)
+    if mode == "bfs":
+        search.bfs(theMap.start,theMap.goal)
+    elif mode == "dfs":
+        search.dfs(theMap.start,theMap.goal)
+    elif mode == "astar":
+        search.a_star()
+    else:
+        "this mode is not made"
+button1 = Button(bottomFrame, text="start", fg="red", command=start)
+button1.pack()
+
 paintMap(theMap.grid)
 root.mainloop()
 
-
-#theMap.printMap()
-
-#star = Search(theMap)
-#star.dfs(theMap.start,theMap.goal)
-#star.bfs(theMap.start,theMap.goal)
-#star.run()
 
