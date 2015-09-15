@@ -365,7 +365,7 @@ def start():
         x = square[0]
         y = square[1]
         w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
-=======
+
 #----------Menu--------------
 menu = Menu(root)
 root.config(menu=menu)
