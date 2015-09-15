@@ -107,25 +107,21 @@ class Search(object):
             if (node.position[0]+1, node.position[1]) not in self.map.walls:
                 new_node1 = Node((node.position[0]+1, node.position[1]), node)
                 successors.append(new_node1)
-            #self.count += 1
 
         if node.position[1]+1 <= self.map.mapsize[1]-1:
             if (node.position[0], node.position[1]+1) not in self.map.walls:
                 new_node2 = Node((node.position[0], node.position[1]+1), node)
                 successors.append(new_node2)
-            #self.count += 1
 
         if node.position[0]-1 >= 0:
             if (node.position[0]-1, node.position[1]) not in self.map.walls:
                 new_node3 = Node((node.position[0]-1, node.position[1]), node)
                 successors.append(new_node3)
-            #self.count += 1
 
         if node.position[1]-1 >= 0:
             if (node.position[0], node.position[1]-1) not in self.map.walls:
                 new_node4 = Node((node.position[0], node.position[1]-1), node)
                 successors.append(new_node4)
-            #self.count += 1
 
         return successors
 

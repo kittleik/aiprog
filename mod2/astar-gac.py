@@ -4,49 +4,37 @@
 
 import sys
 import re
+import itertools
+import time
 
 inFile = sys.argv[1]
 
-class Vertex:
-	def __init__(self, ixy, neighbours, domain):
-		self.index = ixy[0]
-		self.x = ixy[1]
-		self.y = ixy[2]
-		self.neighbours = neighbours
-		self.domain = domain
-		self.state = []
-
-	def setColor(self, color):
-		self.color = color
-
 class Graph:
 	def __init__(self, nv, ne, vertices, edges, domain):
-		self.nv = nv
-		self.ne = ne
-		self.vertices = []
-		self.indices = set()
-		self.domain = domain
-		self.edges = edges
-		# Adding all vertices to a list
-		# Applying domains for the vertices
+		self.vertices = self.createVertices(vertices)
+		self.constraints = self.createConstraints(edges)
+		self.domains = self.createDomains(vertices,domain)
+
+	def createDomains(self,vertices,domains):
+		nodes = {}
 		for v in vertices:
-			vertex = Vertex(v, [], self.domain)
-			self.vertices.append(vertex)
-			self.indices.add(v[0])
+			key = "n" + str(v[0])
+			nodes[key] = list(domains)
+		return nodes
 
-		# Applying CSP state to vertices
-		for v in self.vertices:
-			v.state = self.vertices
+	def createVertices(self,vertices):
+		nodes = {}
+		for v in vertices:
+			key = "n" + str(v[0])
+			xy = (v[0],v[1])
+			nodes[key] = xy
+		return nodes
 
-		# Applying all edges
+	def createConstraints(self, edges):
+		constraints = []
 		for e in edges:
-			e1 = e[0]
-			e2 = e[1]
-			if e1 in self.indices:
-				self.vertices[e1].neighbours.append(e)
-			if e2 in self.indices:
-				self.vertices[e2].neighbours.append(e)
-
+			constraints.append((e[0],e[1]))
+		return constraints
 
 # General Arc Consistency
 class GAC:
@@ -54,8 +42,29 @@ class GAC:
 		self.queue = []
 		self.graph = graph
 
-	def getVertex(self,index,graph):
-		return graph.vertices[index]
+	def getAllPairs(self, a, b):
+		return itertools.product(a,b)
+
+	def get_all_neighboring_arcs(self, var):
+		nba = []
+		for i in self.graph.constraints:
+			if i[0] == var:
+				nba.append(i[1])
+		for i in self.graph.constraints:
+			if i[1] == var:
+				nba.append(i[0])
+		return nba
+
+	def revise(self, x, c):
+		deleted = False
+
+		name = x[1]
+		domain = self.graph.domains[x[0]]
+		nba = self.get_all_neighboring_arcs(name)
+		domain2 = self.graph.domains["n2"]
+		a = itertools.product(domain, domain2)
+
+
 
 	def initGAC(self, graph):
 		#(a,b)
@@ -80,16 +89,27 @@ class GAC:
 		return q
 
 	def runGAC(self):
+		'''
 		#generate the initial state
 		init_state = self.graph
 		# queue av [vertex1,vertex2]
 		q = self.initGAC(init_state)
-
 		while len(q) > 0:
-			todoRevise = q.pop[0]
+			nextPair = q.pop(0)
+			#domain of the revised vertex
+			prevDomain = nextPair[0].domain
+			revisedVertex = revise(nextPair[0], nextPair[1])
+			revisedDomain = revisedVertex.domain
+
+			if reduced(prevDomain, revisedDomain):
+				q.append()
+
+'''
 		#domain filtering loop
 
-
+	def reduced(self,a,b):
+		matches = set(a) & set(b)
+		return len(a) == len(matches)
 
 
 	def domainFiltering(self):
@@ -104,21 +124,6 @@ class GAC:
 
 	def reRun(self):
 		return True
-
-	def revise(self,a,b):
-		domain = []
-		for i in a:
-			for j in b:
-				if not(i == j):
-					domain.append(i)
-					break
-				else:
-					continue
-		return domain
-
-
-
-
 
 
 # --------------------READING GRAPH FROM FILE---------------------------
@@ -139,8 +144,9 @@ neighbours = instructions[nv+2:]
 # Domain
 
 domain = [0,1,2,3,4,5,6,7,8,9]
-
+domain1 = [0,1,2,3,4,5,6,7,8,9]
+c1 = "=="
 g = Graph(nv,ne,ixy,neighbours, domain)
-
 gac = GAC(g)
-gac.runGAC()
+x = "n0"
+gac.revise((x,10),c1)
