@@ -28,11 +28,16 @@ class Graph:
 		self.domain = domain
 		self.edges = edges
 		# Adding all vertices to a list
-		# Applyting domains for the vertices
+		# Applying domains for the vertices
 		for v in vertices:
 			vertex = Vertex(v, [], self.domain)
 			self.vertices.append(vertex)
 			self.indices.add(v[0])
+
+		# Applying CSP state to vertices
+		for v in self.vertices:
+			v.state = self.vertices
+
 		# Applying all edges
 		for e in edges:
 			e1 = e[0]
@@ -41,9 +46,6 @@ class Graph:
 				self.vertices[e1].neighbours.append(e)
 			if e2 in self.indices:
 				self.vertices[e2].neighbours.append(e)
-
-
-
 
 
 # General Arc Consistency
@@ -64,26 +66,27 @@ class GAC:
 			varY = pair[1]
 			nodeX = self.getVertex(varX,graph)
 			nodeY = self.getVertex(varY,graph)
-			revise_request = self.revise(nodeX,nodeY,constraint=None)
+			revise_request = [nodeX,nodeY]
 			q.append(revise_request)
+		# returning a queue of node pairs
 		return q
 
 	def generatePairs(self, graph):
 		edges = graph.edges
 		q = []
 		for e in edges:
-			e1 = e[0]
-			e2 = e[1]
-			pair = (e1,e2)
+			pair = (e[0],e[1])
 			q.append(pair)
 		return q
 
 	def runGAC(self):
 		#generate the initial state
 		init_state = self.graph
-		#running gac instantiate to refine
+		# queue av [vertex1,vertex2]
 		q = self.initGAC(init_state)
-		print q
+
+		while len(q) > 0:
+			todoRevise = q.pop[0]
 		#domain filtering loop
 
 
@@ -102,8 +105,17 @@ class GAC:
 	def reRun(self):
 		return True
 
-	def revise(self,a,b,constraint):
-		return
+	def revise(self,a,b):
+		domain = []
+		for i in a:
+			for j in b:
+				if not(i == j):
+					domain.append(i)
+					break
+				else:
+					continue
+		return domain
+
 
 
 
@@ -129,5 +141,6 @@ neighbours = instructions[nv+2:]
 domain = [0,1,2,3,4,5,6,7,8,9]
 
 g = Graph(nv,ne,ixy,neighbours, domain)
+
 gac = GAC(g)
 gac.runGAC()
