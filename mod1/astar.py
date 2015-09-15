@@ -344,6 +344,24 @@ topFrame.pack()
 bottomFrame = Frame(root)
 bottomFrame.pack(side=BOTTOM)
 
+w = Canvas(topFrame, width=500, height=500)
+paint_list = []
+def callback():
+    x = random.randint(0,19)
+    y = random.randint(0,19)
+    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+    #root.after(1000, callback)
+
+def start():
+    star = Search(theMap)
+    star.bfs(theMap.start,theMap.goal)
+    paint_list = star.rekke
+    while len(paint_list) > 0:
+        square = paint_list.pop(0)
+        x = square[0]
+        y = square[1]
+        w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+
 #----------Menu--------------
 menu = Menu(root)
 root.config(menu=menu)
@@ -425,4 +443,9 @@ button1.pack()
 paintMap(theMap.grid)
 root.mainloop()
 
+#theMap.printMap()
 
+#star = Search(theMap)
+#star.dfs(theMap.start,theMap.goal)
+#star.bfs(theMap.start,theMap.goal)
+#star.run()
