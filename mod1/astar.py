@@ -1,8 +1,6 @@
 import sys
 import re
 import heapq, Queue
-import wx
-import wx.grid
 import random
 from Tkinter import *
 import time
@@ -351,6 +349,7 @@ def start():
         x = square[0]
         y = square[1]
         w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
+        time.sleep(0.01)
         root.update()
 
 button1 = Button(bottomFrame, text="start", fg="red", command=start)
@@ -401,4 +400,3 @@ root.mainloop()
 #star.dfs(theMap.start,theMap.goal)
 #star.bfs(theMap.start,theMap.goal)
 #star.run()
-
