@@ -1,6 +1,5 @@
-#module 2
-
-# Graph coloring with A*
+# module 2
+# General Arc Consistency
 
 import sys
 import re
@@ -9,7 +8,7 @@ import time
 from graph import Graph
 
 inFile = sys.argv[1]
-# General Arc Consistency
+
 class GAC:
 	def __init__(self, graph):
 		self.queue = []
@@ -62,23 +61,24 @@ class GAC:
 		return q
 
 	def runGAC(self):
-		'''
-		#generate the initial state
-		init_state = self.graph
-		# queue av [vertex1,vertex2]
-		q = self.initGAC(init_state)
-		while len(q) > 0:
-			nextPair = q.pop(0)
-			#domain of the revised vertex
-			prevDomain = nextPair[0].domain
-			revisedVertex = revise(nextPair[0], nextPair[1])
-			revisedDomain = revisedVertex.domain
+		print "VARIABLES"
+		print self.graph.variables
+		print "DOMAINS"
+		print self.graph.domains
+		print "NEIGHBORS"
+		print self.graph.neighbors
+		revise_pairs = []
+		for variable in self.graph.neighbors:
+			neighbors = self.graph.neighbors[variable]
+			for neighbor in neighbors:
+				revise_pairs.append((variable, neighbor))
+		print revise_pairs
 
-			if reduced(prevDomain, revisedDomain):
-				q.append()
-
-'''
-		#domain filtering loop
+	def makefunc(self, var_names, expression, envir=globals()):
+		args = ""
+		for n in var_names: args = args + "," + n
+		print "(lambda " + args[1:] + ": " + expression + ")"
+		return eval("(lambda " + args[1:] + ": " + expression + ")", envir)
 
 	def reduced(self,a,b):
 		matches = set(a) & set(b)
@@ -116,3 +116,18 @@ edges = instructions[nv+2:]
 
 domain = [0,1,2]
 g = Graph(ixy,edges,domain)
+gac = GAC(g)
+gac.runGAC()
+
+
+a = 100
+b = 22
+c = 11
+x = 1
+y = 2
+z = 3
+#func = gac.makefunc(['a','b', 'c'],"a + b + c")
+#func(a,b,c)
+#print apply(func,[a,y,z])
+
+

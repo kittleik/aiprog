@@ -4,6 +4,7 @@ class Graph:
 		self.variables = self.createVariables(ixy)
 		self.domains = self.createDomains(self.variables, domain)
 		self.neighbors = self.createNeighbors(self.variables,edges)
+		self.constraints = self.createConstraints(edges)
 
 	def createVariables(self, ixy):
 		variables = {}
@@ -27,3 +28,19 @@ class Graph:
 				if e[1] == int(var[1:]):
 					neighbors[var].append('n' + str(e[0]))
 		return neighbors
+
+	# In this case all constraints are the same
+	def createConstraints(self,edges):
+		constraints = {}
+		for e in edges:
+			var1 = 'n' + str(e[0])
+			var2 = 'n' + str(e[1])
+			func = self.makefunc(['a','b'],"a!=b")
+			constraint = [var1,var2,func]
+			constraints[str(var1)+str(var2)] = constraint
+		return constraints
+
+	def makefunc(self, var_names, expression, envir=globals()):
+		args = ""
+		for n in var_names: args = args + "," + n
+		return eval("(lambda " + args[1:] + ": " + expression + ")", envir)
