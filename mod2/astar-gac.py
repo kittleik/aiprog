@@ -14,43 +14,37 @@ class GAC:
 		self.queue = []
 		self.graph = graph
 
-	def getAllPairs(self, a, b):
-		return itertools.product(a,b)
+	def getAllPairs(self, var_names):
+		all_pairs = []
+		domains = []
+		for v in var_names:
+			domains.append(self.graph.domains[v])
+		for n in itertools.product(*domains):
+			all_pairs.append(list(n))
+		return all_pairs
 
-	def get_all_neighboring_arcs(self, var):
-		nba = []
-		for i in self.graph.constraints:
-			if i[0] == var:
-				nba.append(i[1])
-		for i in self.graph.constraints:
-			if i[1] == var:
-				nba.append(i[0])
-		return nba
+	def getDomain(self,var):
+		return self.graph.domains[var]
 
 	def revise(self, x, c):
-		deleted = False
-
-		name = x[1]
-		domain = self.graph.domains[x[0]]
-		nba = self.get_all_neighboring_arcs(name)
-		domain2 = self.graph.domains["n2"]
-		a = itertools.product(domain, domain2)
+		focal = x
+		constraint = self.graph.constraints[c]
+		var_names = constraint[0]
+		func = constraint[1]
+		return self.reduced(focal, var_names, func)
 
 
-
-	def initGAC(self, graph):
-		#(a,b)
-		pairs = self.generatePairs(graph)
-		q = []
-		for pair in pairs:
-			varX = pair[0]
-			varY = pair[1]
-			nodeX = self.getVertex(varX,graph)
-			nodeY = self.getVertex(varY,graph)
-			revise_request = [nodeX,nodeY]
-			q.append(revise_request)
-		# returning a queue of node pairs
-		return q
+	def reduced(self, x, var_names, func):
+		reduced = [False]*len(self.graph.domains[x])
+		all_pairs = self.getAllPairs(var_names)
+		for d in range(len(self.graph.domains[x])):
+			for p in all_pairs:
+				if p[0] == d:
+					if apply(func,p):
+						reduced[d] = True
+		return reduced																					#returns a list of Bool [True,False] which represents
+																										#domain values being reduced of not, False means reduced
+																										#because the constraint did not match any values of dom(x)
 
 	def generatePairs(self, graph):
 		edges = graph.edges
@@ -61,42 +55,45 @@ class GAC:
 		return q
 
 	def runGAC(self):
-		print "VARIABLES"
-		print self.graph.variables
-		print "DOMAINS"
-		print self.graph.domains
-		print "NEIGHBORS"
-		print self.graph.neighbors
-		revise_pairs = []
+		todoRevise = []																					#initialize queue
+		self.graph.domains["n0"] = [0]
+		self.graph.domains["n14"] = [1,2,3,4,5]
 		for variable in self.graph.neighbors:
-			neighbors = self.graph.neighbors[variable]
-			for neighbor in neighbors:
-				revise_pairs.append((variable, neighbor))
-		print revise_pairs
-
+			for neighbor in self.graph.neighbors[str(variable)]:										#putting requests to queue
+				constraint_name = (str(variable) + '_' + str(neighbor))
+				if constraint_name in self.graph.constraints:
+					todoRevise.append((variable, constraint_name))
+		while len(todoRevise) > 0:
+			variable, constraint = todoRevise.pop(0)
+			result = self.revise(variable, constraint)
+			print result															#ex. ('n12', 'n12n18' )
+			print "len: "+ str(len(result))
+			print self.graph.domains[variable]
+			for i in range(len(result)):
+				print i
+				if result[i] == False:
+					a = self.graph.domains[variable].pop(i-1)
+					print "a: " + str(a)
+					neighbors = self.graph.neighbors[variable]
+					for neighbor in neighbors:
+						if neighbor == self.graph.constraints[constraint][0][1]:																# NB maa fikses, veldig hardcoded
+							continue
+						else:
+							constraint_name = (str(variable) + '_' + str(neighbor))
+							if constraint_name in self.graph.constraints:
+								todoRevise.append((variable, constraint_name))
+				else:
+					continue
+		print self.graph.domains
 	def makefunc(self, var_names, expression, envir=globals()):
 		args = ""
 		for n in var_names: args = args + "," + n
-		print "(lambda " + args[1:] + ": " + expression + ")"
 		return eval("(lambda " + args[1:] + ": " + expression + ")", envir)
 
-	def reduced(self,a,b):
-		matches = set(a) & set(b)
-		return len(a) == len(matches)
-
-
-	def domainFiltering(self):
-		#TODO implement
-		# While queue not empty
-		# -TODO-REVISE*(X*,Ci)
-		# -call REVISE*(X*Ci)
-		# -if domain(X*) gets reduced by the call, then:
-		#	- Push TODO-REVISE*(Xkm, Ck) onto QUEUE for all Ck(k not = i) in which X*
-		#		appers, and all Xkm not = X*
-		return True
 
 	def reRun(self):
 		return True
+
 
 
 # --------------------READING GRAPH FROM FILE---------------------------
@@ -114,20 +111,13 @@ ixy = instructions[1:nv+1]
 # [index_of_neighbour1, index_of_neighbour2]
 edges = instructions[nv+2:]
 
-domain = [0,1,2]
+domain = [0,1,2,3,4,5,6,7,8,9]
 g = Graph(ixy,edges,domain)
 gac = GAC(g)
 gac.runGAC()
 
 
-a = 100
-b = 22
-c = 11
-x = 1
-y = 2
-z = 3
-#func = gac.makefunc(['a','b', 'c'],"a + b + c")
-#func(a,b,c)
-#print apply(func,[a,y,z])
 
 
+
+#combi = list(itertools.product())

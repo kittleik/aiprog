@@ -36,9 +36,10 @@ class Graph:
 			var1 = 'n' + str(e[0])
 			var2 = 'n' + str(e[1])
 			func = self.makefunc(['a','b'],"a!=b")
-			constraint = [var1,var2,func]
-			constraints[str(var1)+str(var2)] = constraint
+			constraint = [[var1,var2],func]
+			constraints[str(var1)+'_'+str(var2)] = constraint
 		return constraints
+
 
 	def makefunc(self, var_names, expression, envir=globals()):
 		args = ""
