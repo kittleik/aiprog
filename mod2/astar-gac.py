@@ -37,12 +37,16 @@ class GAC:
 	def reduced(self, x, var_names, func):
 		reduced = [False]*len(self.graph.domains[x])
 		all_pairs = self.getAllPairs(var_names)
+		'''
+		print reduced
+		print "pairs: " + str(all_pairs)
+		print "domX: " + str(domX)
+		'''
 		domX = self.graph.domains[x]
 		for i in range(len(domX)):
 			for p in all_pairs:
 				if p[0] == domX[i]:
 					if apply(func,p):
-						#eg. a>b satisfied
 						reduced[i] = True
 		return reduced																					#returns a list of Bool [True,False] which represents
 																										#domain values being reduced of not, False means reduced
@@ -55,17 +59,32 @@ class GAC:
 				constraint_name = (str(variable) + '_' + str(neighbor))
 				if constraint_name in self.graph.constraints:
 					todoRevise.append((variable, constraint_name))
+		print len(todoRevise)
+		'''
+		x , c = todoRevise.pop(0)
+
+		print x
+		print c
+		result = self.revise(x, c)
+		removed_count = 0
+		for i in range(len(result)):
+			if result[i] == False:
+				a = self.graph.domains[x].pop(i-removed_count)
+				removed_count += 1
+		print self.graph.domains[x]
+		'''
 
 		while len(todoRevise) > 0:
 			x, c = todoRevise.pop(0)
 			result = self.revise(x, c)
 			removed_count = 0
 			for i in range(len(result)):
+				#print result
 				if result[i] == False:
 					a = self.graph.domains[x].pop(i-removed_count)
 					removed_count += 1
-					neighbors = self.graph.neighbors[x]
-		print self.graph.domains
+					#neighbors = self.graph.neighbors[x]
+		#print self.graph.domains
 
 	def makefunc(self, var_names, expression, envir=globals()):
 		args = ""
@@ -95,30 +114,27 @@ edges = instructions[nv+2:]
 
 domain = [1,2,3]
 g = Graph(ixy,edges,domain)
-g.domains["n12"] = [1]
 
 #g.domains["n18"] = [1]
 gac = GAC(g)
+
+gac.graph.domains["n2"] = [1]
+
 gac.runGAC()
-print g.neighbors
+
+print gac.graph.domains
+print "-----------NB----------"
+print gac.graph.constraints
 
 
 
 
 
 
-'''
-g.domains["n12"] = [1]
-g.domains["n18"] = [1]
-func = g.constraints["n12_n18"][1]
-x = "n12"
-var_names = g.constraints["n12_n18"][0]
-
-print gac.reduced(x,var_names,func)
 
 
 
-'''
+
 
 
 

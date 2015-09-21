@@ -6,6 +6,7 @@ class Graph:
 		self.neighbors = self.createNeighbors(self.variables,edges)
 		self.constraints = self.createConstraints(edges)
 
+
 	def createVariables(self, ixy):
 		variables = {}
 		for i in ixy:
