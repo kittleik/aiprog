@@ -36,9 +36,13 @@ class Graph:
 		for e in edges:
 			var1 = 'n' + str(e[0])
 			var2 = 'n' + str(e[1])
-			func = self.makefunc(['a','b'],"a!=b")
+			func = self.makefunc(['a','b'],"a>b")
 			constraint = [[var1,var2],func]
+			# Adding constraints both ways
 			constraints[str(var1)+'_'+str(var2)] = constraint
+			constraints[str(var2)+'_'+str(var1)] = constraint
+
+
 		return constraints
 
 

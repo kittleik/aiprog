@@ -27,64 +27,54 @@ class GAC:
 		return self.graph.domains[var]
 
 	def revise(self, x, c):
-		focal = x
 		constraint = self.graph.constraints[c]
 		var_names = constraint[0]
 		func = constraint[1]
-		return self.reduced(focal, var_names, func)
+		return self.reduced(x, var_names, func)
 
 
 	def reduced(self, x, var_names, func):
 		reduced = [False]*len(self.graph.domains[x])
 		all_pairs = self.getAllPairs(var_names)
-		'''
-		print reduced
-		print "pairs: " + str(all_pairs)
-		print "domX: " + str(domX)
-		'''
+		focal_index = self.getFocalIndex(x, var_names)
+
 		domX = self.graph.domains[x]
+
 		for i in range(len(domX)):
 			for p in all_pairs:
-				if p[0] == domX[i]:
+				if p[focal_index] == domX[i]:
 					if apply(func,p):
 						reduced[i] = True
 		return reduced																					#returns a list of Bool [True,False] which represents
 																										#domain values being reduced of not, False means reduced
 																										#because the constraint did not match any values of dom(x)
+	def getFocalIndex(self,x ,var_names):
+		for i in range(len(var_names)):
+			if var_names[i] == x:
+				index = i
+				break
+
+		return index
+
 
 	def runGAC(self):
 		todoRevise = []																					#initialize queue
+		todoDelete = {}
 		for variable in self.graph.neighbors:
 			for neighbor in self.graph.neighbors[str(variable)]:										#putting requests to queue
 				constraint_name = (str(variable) + '_' + str(neighbor))
 				if constraint_name in self.graph.constraints:
 					todoRevise.append((variable, constraint_name))
-		print len(todoRevise)
-		'''
-		x , c = todoRevise.pop(0)
-
-		print x
-		print c
-		result = self.revise(x, c)
-		removed_count = 0
-		for i in range(len(result)):
-			if result[i] == False:
-				a = self.graph.domains[x].pop(i-removed_count)
-				removed_count += 1
-		print self.graph.domains[x]
-		'''
 
 		while len(todoRevise) > 0:
 			x, c = todoRevise.pop(0)
 			result = self.revise(x, c)
-			removed_count = 0
-			for i in range(len(result)):
-				#print result
-				if result[i] == False:
-					a = self.graph.domains[x].pop(i-removed_count)
-					removed_count += 1
-					#neighbors = self.graph.neighbors[x]
-		#print self.graph.domains
+			todoDelete[x] = result
+		res = {}
+		for key in todoDelete:
+			res[key] = deleteMerge(todoDelete[key],self.graph.domains[key])
+		print todoDelete
+		print res
 
 	def makefunc(self, var_names, expression, envir=globals()):
 		args = ""
@@ -95,6 +85,12 @@ class GAC:
 	def reRun(self):
 		return True
 
+def deleteMerge(lista, listb):
+	res = []
+	for a in range(len(lista)):
+		if lista[a]:
+			res.append(listb[a])
+	return res
 
 
 # --------------------READING GRAPH FROM FILE---------------------------
@@ -112,21 +108,24 @@ ixy = instructions[1:nv+1]
 # [index_of_neighbour1, index_of_neighbour2]
 edges = instructions[nv+2:]
 
-domain = [1,2,3]
+domain = [0,2,3]
 g = Graph(ixy,edges,domain)
 
 #g.domains["n18"] = [1]
 gac = GAC(g)
 
-gac.graph.domains["n2"] = [1]
+
 
 gac.runGAC()
-
+'''
+gac.graph.domains["n12"] = [1,2,3,5]
+gac.graph.domains["n18"] = [2,4,10]
+x = "n18"
+constraint = "n18_n12"
+a = gac.revise(x,constraint)
+print a
 print gac.graph.domains
-print "-----------NB----------"
-print gac.graph.constraints
-
-
+'''
 
 
 
