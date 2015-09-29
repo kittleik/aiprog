@@ -62,6 +62,14 @@ class GAC:
 
 		return index
 
+	def getNeighborsExceptCurrent(self,var,constraint):
+		current_variables = self.graph.constraints[constraint][0]
+		neighbors = self.graph.neighbors[var]
+		for v in current_variables:
+			if v in neighbors:
+				neighbors.remove(v)
+
+		return neighbors
 
 	def runGAC(self):
 		todoRevise = []																					#initialize queue
@@ -75,26 +83,20 @@ class GAC:
 		while len(todoRevise) > 0:
 			x, c = todoRevise.pop(0)
 			result = self.revise(x, c)
-			reduced = result[0]
-			removes = result[1]
-			domain = self.graph.domains[x]
-			if reduced:
-				newDomain = self.getNewDomainValues(domain,removes)
-				self.graph.domains[x] = newDomain
+			is_reduced = result[0]
+			to_be_removed = result[1]
+			current_domain = self.graph.domains[x]
 
-		print self.graph.domains
+			if is_reduced:
+				new_domain = self.getNewDomainValues(current_domain,to_be_removed)
+				self.graph.domains[x] = new_domain
+				current_neighbors = self.getNeighborsExceptCurrent(x,c)
 
+				for n in current_neighbors:
+					constraint_name = (str(n) + '_' + str(x))
+					if constraint_name in self.graph.constraints:
+						todoRevise.append((n, constraint_name))
 
-
-		#print todoDelete
-		'''
-		res = {}
-		for key in todoDelete:
-			res[key] = deleteMerge(todoDelete[key],self.graph.domains[key])
-		print todoDelete
-		print "----"
-		print res
-		'''
 
 	def getNewDomainValues(self,domain,removes):
 		newdom = []
@@ -145,64 +147,18 @@ g.domains["n11"] = [3]
 g.domains["n10"] = [4]
 g.domains["n15"] = [5]
 g.domains["n13"] = [0]
-gac = GAC(g)
-print gac.graph.neighbors
+g.domains["n13"] = [1]
+g.domains["n2"] = [1]
 
+gac = GAC(g)
+
+#print "----neighbors-----"
+#print gac.graph.neighbors
 
 
 gac.runGAC()
-'''
-gac.graph.domains["n12"] = [1,2,3,5]
-gac.graph.domains["n18"] = [2,4,10]
-x = "n18"
-constraint = "n18_n12"
-a = gac.revise(x,constraint)
-print a
 print gac.graph.domains
-'''
 
-'''
-
-delete = {}
-delete["n10"] = [True,True,False]
-
-domains = {}
-domains["n10"] = [1,2,3]
-
-print delete
-print domains
-
-deln10 = delete.get("n10")
-domn10 = domains.get("n10")
-print domn10
-
-newdom = []
-for d in range(len(deln10)):
-	if deln10[d]:
-		d_value = domn10[d]
-		newdom.append(d_value)
-print newdom
-domains["n10"] = newdom
-
-domn10 = domains.get("n10")
-
-print deln10
-print domn10
-
-hei = ([0],[True,True,False])
-
-h = hei[0]
-e = hei[1]
-
-print h
-print e
-hei[1][0] = 0
-hei[0][0] = 1
-
-print hei
-
-
-'''
 
 
 
