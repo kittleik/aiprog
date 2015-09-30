@@ -1,10 +1,11 @@
 class Graph:
 
-	def __init__(self, ixy, edges, domain):
+	def __init__(self, ixy, edges, domain, nv):
 		self.variables = self.createVariables(ixy)
 		self.domains = self.createDomains(self.variables, domain)
 		self.neighbors = self.createNeighbors(self.variables,edges)
 		self.constraints = self.createConstraints(edges)
+		self.nv = nv
 
 
 	def createVariables(self, ixy):

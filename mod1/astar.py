@@ -10,6 +10,7 @@ inFile = sys.argv[1]
 
 class Node(object):
     def __init__(self,position, parent):
+        self.state = "5245"
         self.g_cost = 0
         self.h_cost = 0
         self.f_cost = 0
@@ -39,9 +40,11 @@ class Search(object):
         self.colored = set()
         self.path = []
 
+    # HEURISTIC
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
+    # SUCCESSORS
     def generate_successor_bfs(self, node, discovered):
         successors = []
         if node.position[0]+1 <= self.map.mapsize[0]-1:
@@ -218,7 +221,6 @@ class Search(object):
         print "starting position is %s" % (self.start,)
         self.goal = self.map.goal
         print "the goal is at  %s" % (self.goal,)
-        path = []
         move_cost = 1
         initial_node = Node(self.start,None)
         initial_node.g_cost = 1
@@ -226,6 +228,7 @@ class Search(object):
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
         #pushes into openlist that is a priorty queue with
         heapq.heappush(self.openlist, initial_node)
+
         #Agenda loop
         count = 0
         while True:
@@ -253,10 +256,13 @@ class Search(object):
             shuffle(self.successors)
             for successor in self.successors:
                 node.appendkid(successor)
+                #Sjekker om successor node finnes i open- eller closedlist
                 if self.unique(successor):
+                    #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
                     heapq.heappush(self.openlist, successor)
                 elif node.g_cost + successor.move_cost < successor.g_cost:
+                    #hvis ikke
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
@@ -292,6 +298,7 @@ class Map:
                     self.grid[basex+x][basey+y] = '#'
                     self.walls.append((basex+x,basey+y))
 
+        print self.grid
     def printMap(self):
         for i in (self.grid):
             print '|',
@@ -351,17 +358,6 @@ def callback():
     y = random.randint(0,19)
     w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
     #root.after(1000, callback)
-
-def start():
-    star = Search(theMap)
-    star.bfs(theMap.start,theMap.goal)
-    paint_list = star.rekke
-    while len(paint_list) > 0:
-        square = paint_list.pop(0)
-        x = square[0]
-        y = square[1]
-        w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
-
 #----------Menu--------------
 menu = Menu(root)
 root.config(menu=menu)
