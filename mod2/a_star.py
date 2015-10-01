@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from gac import GAC
 from graph import Graph
 import re
@@ -20,6 +23,16 @@ class Node(object):
     def appendkid(self, node):
         self.kids.append(node)
 
+    def computeHeuristic(self, domains):
+        result = 0
+        for domain in domains:
+            result += (len(domains[domain]) - 1)
+        return result
+    def generateSuccerssors(self, domains):
+        successors = []
+        for k in domains:
+            for d in domains[k]:
+
 
 class Search(object):
 
@@ -27,33 +40,45 @@ class Search(object):
         self.openlist = []
         heapq.heapify(self.openlist)
         self.closedlist = []
+        self.states = {}
 
+    def makeStringFromList(self, list):
+        result = ""
+        for i in list:
+            result += str(i)
+        return result
+
+
+    def generateUID(self,domains):
+        uid = ""
+        for key in domains:
+            uid += (key + self.makeStringFromList(domains[key]))
+        return uid
 
     def a_star(self,state):
             # creating initial node
+            # Setter opp første node og dens state
             state = state
             node = Node(state,None)
-            #Lage global UID
-            # geneate UID
-            # compute HEURISTIC,
-            # compute f value
-
+            node.f = node.computeHeuristic(self.states[state])
             heapq.heappush(self.openlist, node)
 
             #AGENDA LOOP
-
             while True:
                 if len(self.openlist) == 0:
                     print "openlist is empty, no solution"
                     break
                 node = heapq.heappop(self.openlist)
-                print node.state
+                state_domains = self.states[node.state]
+                successors = node.generateSuccerssors(state_domains)
+                #print successors
 
+                '''
                 successors = node.generateSuccerssors()
                 # generate successors
                 for successor in successors:
                     generateUID(Node(runGac(successor), node))
-
+'''
 
 
             '''
@@ -120,10 +145,24 @@ g.domains["n13"] = [0]
 g.domains["n2"] = [1]
 '''
 
+# Kjører GAC første gang
 gac = GAC(g)
-state = gac.runGAC()
+# Returnerer (Bool,{domains})
+result = gac.runGAC(gac.graph.domains)
+done = result[0]
+filtered_initial_domains = result[1]
+
 search = Search(g)
-search.a_star(state)
+# Lager UID
+initial_uid = search.generateUID(filtered_initial_domains)
+# Setter inn domains med UID inn i A* sin states dictionary
+search.states[initial_uid] = filtered_initial_domains
+search.a_star(initial_uid)
+
+
+
+#search.a_star(state)
+#print search.generateUID(domains)
 
 #print "----neighbors-----"
 #print gac.graph.neighbors

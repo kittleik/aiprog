@@ -74,6 +74,11 @@ class GAC:
 				if constraint_name in self.graph.constraints:
 					todoRevise.append((variable, constraint_name))
 		# Domain filtering loop
+		result = self.domainFilteringLoop(domains,todoRevise)
+		return result
+
+
+	def domainFilteringLoop(self, domains, todoRevise):
 		while len(todoRevise) > 0:
 			x, c = todoRevise.pop(0)
 			result = self.revise(x, c)
@@ -95,11 +100,12 @@ class GAC:
 		# Check if solution is found
 		if self.isFullyReduced(self.graph.nv,domains):
 			print "DONE"
-			return (True,[])
+			# domains is the answer
+			return (True,domains)
 
 		else:
 			print "NOT DONE YET!"
-			return (True, domains)
+			return (False, domains)
 
 	def isFullyReduced(self,nv,domains):
 		isFullyReduced = False
