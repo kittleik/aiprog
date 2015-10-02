@@ -177,10 +177,10 @@ edges = instructions[nv+1:]
 for constraint in edges:
     for node in constraint:
         node = int(node)
-#edges = [float(instructions[nv+1]),float(instructions[-1])]
+edges = [float(instructions[nv+1]),float(instructions[-1])]
 
-#domain = [0,1,2,3]
-#g = Graph(ixy,edges,domain,nv)
+domain = [0,1,2,3]
+g = Graph(ixy,edges,domain,nv)
 '''
 g.domains["n18"] = [1]
 g.domains["n12"] = [2]
@@ -194,15 +194,15 @@ g.domains["n13"] = [0]
 #g.domains["n3"] = [3]
 
 # Kjører GAC første gang
-#gac = GAC(g)
+gac = GAC(g)
 # Returnerer (Bool,{domains})
 """
 result = gac.runGAC(gac.graph.domains)
 done = result[0]
 filtered_initial_domains = result[1]
 """
-#search = Search(gac)
-#search.a_star()
+search = Search(gac)
+search.a_star()
 # Lager UID
 #initial_uid = search.generateUID(filtered_initial_domains)
 # Setter inn domains med UID inn i A* sin states dictionary
