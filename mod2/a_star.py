@@ -161,19 +161,26 @@ class Search(object):
 onlyNumbers = re.compile('\d+(?:\.\d+)?')
 
 instructions = [onlyNumbers.findall(line) for line in open(inFile, 'r')]
-instructions = [[int(y) for y in x] for x in instructions]
+print instructions
+
+#instructions = [[int(y) for y in x] for x in instructions]
 # number of variables
-nv = instructions[0][0]
+nv = int(instructions[0][0])
 # number of edges
-ne = instructions[0][1]
+ne = int(instructions[0][1])
 # [index_of_vertex, x, y]
-ixy = instructions[1:nv+1]
-print ixy
+ixy = []
+for node in instructions[1:nv+1]:
+    ixy.append(node)
 # [index_of_neighbour1, index_of_neighbour2]
 edges = instructions[nv+1:]
+for constraint in edges:
+    for node in constraint:
+        node = int(node)
+#edges = [float(instructions[nv+1]),float(instructions[-1])]
 
-domain = [0,1,2,3]
-g = Graph(ixy,edges,domain,nv)
+#domain = [0,1,2,3]
+#g = Graph(ixy,edges,domain,nv)
 '''
 g.domains["n18"] = [1]
 g.domains["n12"] = [2]
@@ -187,14 +194,14 @@ g.domains["n13"] = [0]
 #g.domains["n3"] = [3]
 
 # Kjører GAC første gang
-gac = GAC(g)
+#gac = GAC(g)
 # Returnerer (Bool,{domains})
 """
 result = gac.runGAC(gac.graph.domains)
 done = result[0]
 filtered_initial_domains = result[1]
 """
-search = Search(gac)
+#search = Search(gac)
 #search.a_star()
 # Lager UID
 #initial_uid = search.generateUID(filtered_initial_domains)
