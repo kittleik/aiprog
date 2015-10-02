@@ -2,7 +2,7 @@
 # General Arc Consistency
 
 import itertools
-
+import copy
 
 class GAC:
 	def __init__(self, graph):
@@ -31,15 +31,16 @@ class GAC:
 			if r == False:
 				reduced = True
 				break
-		return (reduced,result)
+		return [reduced,result]
 
 
 	def reduced(self, x, var_names, func):
 		reduced = [False]*len(self.graph.domains[x])
+
 		all_pairs = self.getAllPairs(var_names)
 		focal_index = self.getFocalIndex(x, var_names)
 
-		domX = self.graph.domains[x]
+		domX = list(self.graph.domains[x])
 
 		for i in range(len(domX)):
 			for p in all_pairs:
@@ -66,22 +67,37 @@ class GAC:
 
 		return neighbors
 
-	def runGAC(self, domains):
-		todoRevise = []																					#initialize queue
+	def runGAC(self, domains, assumed):
+		dom = copy.deepcopy(domains)
+		self.todoRevise = []																				#initialize queue
 		for variable in self.graph.neighbors:
 			for neighbor in self.graph.neighbors[str(variable)]:										#putting requests to queue
 				constraint_name = (str(variable) + '_' + str(neighbor))
 				if constraint_name in self.graph.constraints:
-					todoRevise.append((variable, constraint_name))
+					self.todoRevise.append((variable, constraint_name))
 		# Domain filtering loop
-		result = self.domainFilteringLoop(domains,todoRevise)
+
+		result = self.domainFilteringLoop(dom, assumed)
+
 		return result
 
 
-	def domainFilteringLoop(self, domains, todoRevise):
+	def domainFilteringLoop(self, domains, assumed):
+		todoRevise = []
+		"""if assumed:
+			for revise in self.todoRevise:
+				a = revise[1]
+				if a[] == assumed:
+					todoRevise.append(revise)
+		else:
+			todoRevise = list(self.todoRevise)
+			"""
+		#print todoRevise
+		todoRevise = copy.deepcopy(self.todoRevise)
 		while len(todoRevise) > 0:
 			x, c = todoRevise.pop(0)
 			result = self.revise(x, c)
+
 			is_reduced = result[0]
 			to_be_removed = result[1]
 			current_domain = domains[x]
@@ -91,7 +107,7 @@ class GAC:
 				domains[x] = new_domain
 				if not domains[x]:
 					print "no solution"
-					return (False, [])
+					return [False, []]
 				current_neighbors = self.getNeighborsExceptCurrent(x,c)
 				for n in current_neighbors:
 					constraint_name = (str(n) + '_' + str(x))
@@ -101,11 +117,12 @@ class GAC:
 		if self.isFullyReduced(self.graph.nv,domains):
 			print "DONE"
 			# domains is the answer
-			return (True,domains)
+			return [True,domains]
 
 		else:
 			print "NOT DONE YET!"
-			return (False, domains)
+			#print domains
+			return [False, domains]
 
 	def isFullyReduced(self,nv,domains):
 		isFullyReduced = False
