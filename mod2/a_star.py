@@ -177,7 +177,6 @@ edges = instructions[nv+1:]
 for constraint in edges:
     for node in constraint:
         node = int(node)
-edges = [float(instructions[nv+1]),float(instructions[-1])]
 
 domain = [0,1,2,3]
 g = Graph(ixy,edges,domain,nv)
