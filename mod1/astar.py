@@ -4,39 +4,19 @@ import heapq, Queue
 from random import shuffle
 from Tkinter import *
 import time
+from node import Node
+from grid import Grid
 
 inFile = sys.argv[1]
 
-
-class Node(object):
-    def __init__(self,position, parent):
-        self.g_cost = 0
-        self.h_cost = 0
-        self.f_cost = 0
-        self.move_cost = 1
-        self.parent = parent
-        self.kids = []
-        self.position = position
-
-    #heapen sorterer etter f verdien til noden
-    def __cmp__(self, other):
-        return cmp(self.f_cost, other.f_cost)
-
-    def appendkid(self, node):
-        self.kids.append(node)
-
-
 class Search(object):
-
-    def __init__(self, map):
+    def __init__(self, grid):
         self.openlist = []
         heapq.heapify(self.openlist)
         self.closedlist = []
-        self.map = map
-        self.map.printMap()
+        self.map = grid
         self.count = 0
         self.pathlength = 0
-        self.colored = set()
         self.path = []
 
     # HEURISTIC
@@ -44,7 +24,6 @@ class Search(object):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
     # SUCCESSORS
-
     def generate_successor_astar(self, node):
         successors = []
         if node.position[0]+1 <= self.map.mapsize[0]-1:
@@ -78,7 +57,6 @@ class Search(object):
             if node.position == opened.position:
                 return False
         return True
-
 
     def attach_eval(self, child, parent):
         child.parent = parent
@@ -128,27 +106,21 @@ class Search(object):
         initial_node.g_cost = 0
         initial_node.h_cost = self.calculate_heuristic(initial_node.position, self.goal)
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
-        #pushes into openlist that is a priorty queue with
-        #------- ------
-        #heapq.heappush(self.openlist, initial_node)
+
         self.addToOpenlist(initial_node)
-        #self.openlist.append(initial_node)
         #Agenda loop
         count = 0
         while True:
             if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
-            #----------
-            #node = heapq.heappop(self.openlist)
-            #node = self.openlist.pop(0)
-            #node = self.openlist.pop()
+
             node = self.removeFromOpenlist()
 
             self.map.grid[node.position[0]][node.position[1]] = 'o'
-            #self.map.printMap()
             self.count += 1
             self.closedlist.append(node)
+
             if node.position == self.goal:
                 #display path, break the while loop
                 print "solution found"
@@ -159,64 +131,25 @@ class Search(object):
                 print "number of searchnodes: %d\n" %(self.count)
                 break
             #adds to the open list
-
-
             self.successors = self.generate_successor_astar(node)
-            #shuffle(self.successors)
+            shuffle(self.successors)
+
             for successor in self.successors:
                 node.appendkid(successor)
                 #Sjekker om successor node finnes i open- eller closedlist
                 if self.unique(successor):
                     #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
-                    #----------
-                    #heapq.heappush(self.openlist, successor)
-                    #self.openlist.append(successor)
+
                     self.addToOpenlist(successor)
 
                 elif node.g_cost + successor.move_cost < successor.g_cost:
-                    #hvis ikke
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
-                paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
-                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
+                paintSingleSquare(successor.position[0],successor.position[1],grid.width,"cyan")
+                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],grid.width,"yellow")
 
-class Map:
-    def __init__(self, width, height, start, goal, walls):
-        self.start = start
-        self.goal = goal
-        self.width = width
-        self.height = height
-        #creating empty grid
-        self.mapsize =(width,height)
-        self.grid = [['.' for i in range(width)] for i in range(height)]
-        #adding start, goal and walls
-        self.goal = tuple(goal)
-        self.start = tuple(start)
-        self.grid[start[0]][start[1]] = 'S'
-        self.grid[goal[0]][goal[1]] = 'G'
-        self.walls = []
-
-        for i in walls:
-            basex = i[0]
-            basey = i[1]
-
-            wallwidth = i[2]
-            wallheight = i[3]
-            for x in range(wallwidth):
-                for y in range(wallheight):
-                    self.grid[basex+x][basey+y] = '#'
-                    self.walls.append((basex+x,basey+y))
-
-        print self.grid
-    def printMap(self):
-        for i in (self.grid):
-            print '|',
-            for y in i:
-                print y,
-            print '|'
-        print "\n"
 
 #==================RUNNING PROGRAM=======================================
 
@@ -231,11 +164,10 @@ start = instructions[1]
 goal = instructions[2]
 walls = instructions[3:]
 
-theMap = Map(width, height, start, goal, walls)
-theMap_copy = Map(width, height, start, goal, walls)
+grid = Grid(width, height, start, goal, walls)
+grid_copy = Grid(width, height, start, goal, walls)
 
 # ------Tkinter-----------
-
 root = Tk()
 mode = "dfs"
 
@@ -254,8 +186,8 @@ def switchMode(string):
         print "not a mode"
 
 def reset():
-    global theMap_copy
-    paintMap(theMap_copy.grid)
+    global grid_copy
+    paintMap(grid_copy.grid)
 
 topFrame = Frame(root)
 topFrame.pack()
@@ -301,7 +233,7 @@ def paintPath(path_list):
     for node in reversed(path_list):
         x = node.position[0]
         y = node.position[1]
-        paintSingleSquare(x,y,theMap,"red")
+        paintSingleSquare(x,y,grid,"red")
         #time.sleep(0.01)
         root.update()
 
@@ -335,18 +267,11 @@ def paintMap(grid):
 
 #---------Buttons------------
 def start():
-    search = Search(theMap)
+    search = Search(grid)
     search.run_algorithm(mode)
 
 button1 = Button(bottomFrame, text="start", fg="red", command=start)
 button1.pack()
 
-paintMap(theMap.grid)
+paintMap(grid.grid)
 root.mainloop()
-
-#theMap.printMap()
-
-#star = Search(theMap)
-#star.dfs(theMap.start,theMap.goal)
-#star.bfs(theMap.start,theMap.goal)
-#star.run()
