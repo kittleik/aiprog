@@ -70,7 +70,7 @@ class GAC:
 		print "#####      ##########  ##########  ######  ######        ############  ########################"
 		print "############   ######  ########               ###  #####  ###########  ########################"
 		print "#####       #########  ######  ##############  ##  #########  #######  ########################"
-		self.todoRevise = []																					#initialize queue
+		self.todoRevise = []																			#initialize queue
 		for variable in self.graph.neighbors:
 			for neighbor in self.graph.neighbors[str(variable)]:										#putting requests to queue
 				constraint_name = (str(variable) + '_' + str(neighbor))
@@ -119,7 +119,6 @@ class GAC:
 			return (True,reducedDomains)
 
 		else:
-			print "NOT DONE YET!"
 			return (False,reducedDomains)
 
 	def isFullyReduced(self,nv,domains):

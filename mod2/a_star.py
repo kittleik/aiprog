@@ -7,6 +7,9 @@ import re
 import sys
 import heapq, Queue
 import copy
+import time
+
+start_time = time.time()
 
 inFile = sys.argv[1]
 
@@ -33,31 +36,36 @@ class Node(object):
         successors = []
         solution = {}
         domains = parent.state
+        assumption_choice = "n0"
+
+        x = 100
+
+        for node in domains:
+            if 1 < len(domains[node]) < x:
+                assumption_choice= node
+                x = len(domains[node])
+                if x == 2:
+                    break
+        print assumption_choice,
+        '''
         for variable in domains:
             if len(domains[variable])>1:
-                search.assumtions +=1
-                print "---------------------"
-                print "#########-------ASSUMED VARIABLE: %s   ---------------################" %(variable)
+
                 ##??
                 #[1,2,3,4]
                 #[1]
+        '''
+        search.assumtions +=1
+        for c in domains[assumption_choice]:
+            domains[assumption_choice] = [c]
+            successor = search.gac.domainFilteringLoop(domains, assumption_choice)
+            # Returnerer (Bool, {newDomains})
+            if successor[0]:
+                solution = successor[1]
+                #break
+            #legger til alle barn
+            successors.append(Node(successor[1],parent))
 
-                for c in domains[variable]:
-                    domains[variable] = [c]
-                    print "BEFORE:"
-                    print domains
-
-                    successor = search.gac.domainFilteringLoop(domains, variable)
-                    # Returnerer (Bool, {newDomains})
-                    print "AFTER:"
-                    print successor[1]
-                    print "-----------------"
-                    if successor[0]:
-                        solution = successor[1]
-                        #break
-                    #legger til alle barn
-                    successors.append(Node(successor[1],parent))
-                break
     #for k in domains:
         #for d in domains[k]:
         return solution, successors
@@ -161,22 +169,39 @@ class Search(object):
 onlyNumbers = re.compile('\d+(?:\.\d+)?')
 
 instructions = [onlyNumbers.findall(line) for line in open(inFile, 'r')]
-print instructions
 
 #instructions = [[int(y) for y in x] for x in instructions]
 # number of variables
+
 nv = int(instructions[0][0])
+
 # number of edges
+
 ne = int(instructions[0][1])
+
 # [index_of_vertex, x, y]
-ixy = []
+
+ixy = instructions[1:nv+1]
+
+for node in ixy:
+    node[0] = int(node[0])
+    node[1] = float(node[1])
+    node[2] = float(node[2])
+
+'''ixy = []
 for node in instructions[1:nv+1]:
-    ixy.append(node)
+    print "node"
+    print node[0]
+    str(node[0]) = int(node[0])
+    node[1] = float(node[1])
+    node[2] = float(node[2])
+    ixy.append(ixy)
+print ixy'''
 # [index_of_neighbour1, index_of_neighbour2]
 edges = instructions[nv+1:]
-for constraint in edges:
-    for node in constraint:
-        node = int(node)
+for constraint in range(len(edges)):
+    for node in range(len(edges[constraint])):
+        edges[constraint][node] = int(edges[constraint][node])
 
 domain = [0,1,2,3]
 g = Graph(ixy,edges,domain,nv)
@@ -202,6 +227,7 @@ filtered_initial_domains = result[1]
 """
 search = Search(gac)
 search.a_star()
+print "The rum time is %s secounds"%(time.time()-start_time)
 # Lager UID
 #initial_uid = search.generateUID(filtered_initial_domains)
 # Setter inn domains med UID inn i A* sin states dictionary
