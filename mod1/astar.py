@@ -10,7 +10,6 @@ inFile = sys.argv[1]
 
 class Node(object):
     def __init__(self,position, parent):
-        self.state = "5245"
         self.g_cost = 0
         self.h_cost = 0
         self.f_cost = 0
@@ -45,64 +44,6 @@ class Search(object):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
 
     # SUCCESSORS
-    def generate_successor_bfs(self, node, discovered):
-        successors = []
-        if node.position[0]+1 <= self.map.mapsize[0]-1:
-            if (node.position[0]+1, node.position[1]) not in self.map.walls:
-                if (node.position[0]+1, node.position[1]) not in discovered:
-                    new_node1 = Node((node.position[0]+1, node.position[1]), node)
-                    new_node1.parent = node
-                    successors.append(new_node1)
-
-        if node.position[1]+1 <= self.map.mapsize[1]-1:
-            if (node.position[0], node.position[1]+1) not in self.map.walls:
-                if (node.position[0], node.position[1]+1) not in discovered:
-                    new_node2 = Node((node.position[0], node.position[1]+1), node)
-                    new_node2.parent = node
-                    successors.append(new_node2)
-
-        if node.position[0]-1 >= 0:
-            if (node.position[0]-1, node.position[1]) not in self.map.walls:
-                if (node.position[0]-1, node.position[1]) not in discovered:
-                    new_node3 = Node((node.position[0]-1, node.position[1]), node)
-                    new_node3.parent = node
-                    successors.append(new_node3)
-
-        if node.position[1]-1 >= 0:
-            if (node.position[0], node.position[1]-1) not in self.map.walls:
-                if (node.position[0], node.position[1]-1) not in discovered:
-                    new_node4 = Node((node.position[0], node.position[1]-1), node)
-                    new_node4.parent = node
-                    successors.append(new_node4)
-
-        return successors
-
-    def generate_successor_dfs(self, node):
-        successors = []
-        if node.position[0]+1 <= self.map.mapsize[0]-1:
-            if (node.position[0]+1, node.position[1]) not in self.map.walls:
-                new_node1 = Node((node.position[0]+1, node.position[1]), node)
-                new_node1.parent = node
-                successors.append(new_node1)
-
-        if node.position[1]+1 <= self.map.mapsize[1]-1:
-            if (node.position[0], node.position[1]+1) not in self.map.walls:
-                new_node2 = Node((node.position[0], node.position[1]+1), node)
-                new_node2.parent = node
-                successors.append(new_node2)
-
-        if node.position[0]-1 >= 0:
-            if (node.position[0]-1, node.position[1]) not in self.map.walls:
-                new_node3 = Node((node.position[0]-1, node.position[1]), node)
-                new_node3.parent = node
-                successors.append(new_node3)
-
-        if node.position[1]-1 >= 0:
-            if (node.position[0], node.position[1]-1) not in self.map.walls:
-                new_node4 = Node((node.position[0], node.position[1]-1), node)
-                new_node4.parent = node
-                successors.append(new_node4)
-        return successors
 
     def generate_successor_astar(self, node):
         successors = []
@@ -161,82 +102,49 @@ class Search(object):
         if node.parent:
             self.draw_path_to_map(node.parent)
 
-    def dfs(self,start,goal):
-        initial_node = Node(start,None)
-        discovered = set()
-        stack = []
-        stack.append(initial_node)
-        while len(stack) > 0:
-            v = stack.pop()
-            if v.position == goal:
-                print "solution found"
-                self.draw_path_to_map(v)
-                paintPath(self.path)
-                self.map.printMap()
-                break
-            if v.position not in discovered:
-                discovered.add(v.position)
-                successors = self.generate_successor_dfs(v)
-                shuffle(successors)
-                for successor in successors:
-                    stack.append(successor)
-                    paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
-                    paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
+    def addToOpenlist(self,node):
+        if mode == "dfs" or mode == "bfs":
+            self.openlist.append(node)
+        if mode == "astar":
+            heapq.heappush(self.openlist, node)
 
+    def removeFromOpenlist(self):
+        if mode == "dfs":
+            return self.openlist.pop()
+        if mode == "bfs":
+            return self.openlist.pop(0)
+        if mode == "astar":
+            return heapq.heappop(self.openlist)
 
-    def bfs(self, start, goal):
-        queue = Queue.Queue()
-        initial_node = Node(start,None)
-        queue.put(initial_node)
-        discovered = set()
-
-        while True:
-            if queue.empty():
-                break
-            next_node = queue.get()
-            if next_node.position == goal:
-                print "solution found"
-                self.draw_path_to_map(next_node)
-                #animasjon
-                paintPath(self.path)
-                self.map.printMap()
-                break
-            if next_node.position not in discovered:
-                discovered.add(next_node.position)
-
-            successors = self.generate_successor_bfs(next_node,discovered)
-            shuffle(successors)
-
-            for successor in successors:
-                successor.parent = next_node
-                queue.put(successor)
-                discovered.add(successor.position)
-                #animasjon
-                paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
-                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
-
-    def a_star(self):
+    def run_algorithm(self,mode):
         # creating initial node
         self.start = self.map.start
         print "starting position is %s" % (self.start,)
         self.goal = self.map.goal
         print "the goal is at  %s" % (self.goal,)
+
         move_cost = 1
         initial_node = Node(self.start,None)
-        initial_node.g_cost = 1
+        initial_node.g_cost = 0
         initial_node.h_cost = self.calculate_heuristic(initial_node.position, self.goal)
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
         #pushes into openlist that is a priorty queue with
-        heapq.heappush(self.openlist, initial_node)
-
+        #------- ------
+        #heapq.heappush(self.openlist, initial_node)
+        self.addToOpenlist(initial_node)
+        #self.openlist.append(initial_node)
         #Agenda loop
         count = 0
         while True:
             if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
-            #print count
-            node = heapq.heappop(self.openlist)
+            #----------
+            #node = heapq.heappop(self.openlist)
+            #node = self.openlist.pop(0)
+            #node = self.openlist.pop()
+            node = self.removeFromOpenlist()
+
             self.map.grid[node.position[0]][node.position[1]] = 'o'
             #self.map.printMap()
             self.count += 1
@@ -252,15 +160,20 @@ class Search(object):
                 break
             #adds to the open list
 
+
             self.successors = self.generate_successor_astar(node)
-            shuffle(self.successors)
+            #shuffle(self.successors)
             for successor in self.successors:
                 node.appendkid(successor)
                 #Sjekker om successor node finnes i open- eller closedlist
                 if self.unique(successor):
                     #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
-                    heapq.heappush(self.openlist, successor)
+                    #----------
+                    #heapq.heappush(self.openlist, successor)
+                    #self.openlist.append(successor)
+                    self.addToOpenlist(successor)
+
                 elif node.g_cost + successor.move_cost < successor.g_cost:
                     #hvis ikke
                     self.attach_eval(successor,node)
@@ -268,8 +181,6 @@ class Search(object):
                         propagate_path_improvements(successor)
                 paintSingleSquare(successor.position[0],successor.position[1],theMap.width,"cyan")
                 paintSingleSquare(successor.parent.position[0],successor.parent.position[1],theMap.width,"yellow")
-
-
 
 class Map:
     def __init__(self, width, height, start, goal, walls):
@@ -383,7 +294,7 @@ w = Canvas(topFrame, width=400, height=420)
 
 def paintSingleSquare(x,y,the_map,fill):
     w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
-    time.sleep(0.01)
+    #time.sleep(0.01)
     root.update()
 
 def paintPath(path_list):
@@ -391,7 +302,7 @@ def paintPath(path_list):
         x = node.position[0]
         y = node.position[1]
         paintSingleSquare(x,y,theMap,"red")
-        time.sleep(0.01)
+        #time.sleep(0.01)
         root.update()
 
 def paintMap(grid):
@@ -425,14 +336,8 @@ def paintMap(grid):
 #---------Buttons------------
 def start():
     search = Search(theMap)
-    if mode == "bfs":
-        search.bfs(theMap.start,theMap.goal)
-    elif mode == "dfs":
-        search.dfs(theMap.start,theMap.goal)
-    elif mode == "astar":
-        search.a_star()
-    else:
-        "this mode is not made"
+    search.run_algorithm(mode)
+
 button1 = Button(bottomFrame, text="start", fg="red", command=start)
 button1.pack()
 
