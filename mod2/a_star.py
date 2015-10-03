@@ -8,6 +8,7 @@ import sys
 import heapq, Queue
 import copy
 import time
+import Tkinter as tk
 
 start_time = time.time()
 
@@ -163,13 +164,93 @@ class Search(object):
                 '''
 
 
+class GUI(tk.Tk):
+    def __init__(self, graph):
+        tk.Tk.__init__(self)
+        self.graph = graph
+        self.graph_size = 800.0
+        self.vertex_size = 10.0
+
+        self.ixy, self.x_size, self.y_size = self.getIXY()
+
+        self.canvas = tk.Canvas(self, width = self.graph_size+50, height = self.graph_size+50, borderwidth = 0)
+        self.canvas.pack(side="top", fill="both", expand="true")
+        self.oval = {}
+
+        for edge in self.graph.edges:
+
+            x1 = (self.ixy[edge[0]][1] * (self.graph_size / self.x_size)) + (self.vertex_size / 2)
+            y1 = (self.ixy[edge[0]][2] * (self.graph_size / self.y_size)) + (self.vertex_size / 2)
+            x2 = (self.ixy[edge[1]][1] * (self.graph_size / self.x_size)) + (self.vertex_size / 2)
+            y2 = (self.ixy[edge[1]][2] * (self.graph_size / self.y_size)) + (self.vertex_size / 2)
+
+            self.canvas.create_line(x1, y1 ,x2, y2)
+
+
+        for vertex in self.ixy:
+            x1 = vertex[1] * (self.graph_size / self.x_size)
+            y1 = vertex[2] * (self.graph_size / self.y_size)
+
+            x2 = x1 + self.vertex_size
+            y2 = y1 + self.vertex_size
+
+            self.oval[vertex[1], vertex[2]] = self.canvas.create_oval(x1, y1, x2, y2, outline="black", fill="gray80", tag="oval")
+
+        print self.oval
+
+        #Place the window in the topmost left corner to prevent glitches in the gui
+        #self.canvas.xview_moveto(0)
+        #self.canvas.yview_moveto(0)
+
+    def getIXY(self):
+        ixy = self.graph.ixy
+
+        x_size = 0
+        y_size = 0
+
+        x_max = ixy[0][1]
+        x_min = ixy[0][1]
+        y_max = ixy[0][2]
+        y_min = ixy[0][2]
+
+        for index in ixy:
+            if index[1] > x_max:
+                x_max = index[1]
+            if index[1] < x_min:
+                x_min = index[1]
+            if index[2] > y_max:
+                y_max = index[2]
+            if index[2] < y_min:
+                y_min = index[2]
+
+        if x_min<0:
+            print "a"
+            x_size = x_max-x_min
+            for index in ixy:
+                index[1] += abs(x_min)
+        else:
+            x_size = x_max
+
+        if y_min<0:
+            print "b"
+            y_size = y_max-y_min
+            for index in ixy:
+                index[2] += abs(y_min)
+        else:
+            y_size = y_max
+
+        print x_min
+
+        return ixy, x_size, y_size
+
+
+
 
     # --------------------READING GRAPH FROM FILE---------------------------
 
-onlyNumbers = re.compile('\d+(?:\.\d+)?')
+onlyNumbers = re.compile('\-?\d+(?:\.\d+)?')
 
 instructions = [onlyNumbers.findall(line) for line in open(inFile, 'r')]
-
 #instructions = [[int(y) for y in x] for x in instructions]
 # number of variables
 
@@ -187,7 +268,6 @@ for node in ixy:
     node[0] = int(node[0])
     node[1] = float(node[1])
     node[2] = float(node[2])
-
 '''ixy = []
 for node in instructions[1:nv+1]:
     print "node"
@@ -216,7 +296,9 @@ g.domains["n13"] = [0]
 
 '''
 #g.domains["n3"] = [3]
-
+#lag GUI
+gui = GUI(g)
+gui.mainloop()
 # Kjører GAC første gang
 gac = GAC(g)
 # Returnerer (Bool,{domains})
@@ -226,7 +308,7 @@ done = result[0]
 filtered_initial_domains = result[1]
 """
 search = Search(gac)
-search.a_star()
+#search.a_star()
 print "The rum time is %s secounds"%(time.time()-start_time)
 # Lager UID
 #initial_uid = search.generateUID(filtered_initial_domains)
