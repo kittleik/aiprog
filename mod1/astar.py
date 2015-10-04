@@ -33,25 +33,58 @@ class Search(object):
     # SUCCESSORS
     def generate_successor_astar(self, node):
         successors = []
+        #east
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             if (node.position[0]+1, node.position[1]) not in self.map.walls:
                 new_node1 = Node((node.position[0]+1, node.position[1]), node)
                 successors.append(new_node1)
 
+        #north east
+        '''
+        if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0]+1, node.position[1]+1) not in self.map.walls:
+                new_node2 = Node((node.position[0]+1, node.position[1]+1), node)
+                successors.append(new_node2)
+        '''
+
+        #north
         if node.position[1]+1 <= self.map.mapsize[1]-1:
             if (node.position[0], node.position[1]+1) not in self.map.walls:
-                new_node2 = Node((node.position[0], node.position[1]+1), node)
-                successors.append(new_node2)
-
-        if node.position[0]-1 >= 0:
-            if (node.position[0]-1, node.position[1]) not in self.map.walls:
-                new_node3 = Node((node.position[0]-1, node.position[1]), node)
+                new_node3 = Node((node.position[0], node.position[1]+1), node)
                 successors.append(new_node3)
 
+        #north west
+        '''
+        if node.position[0]-1 >= 0 and node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0]-1, node.position[1]+1) not in self.map.walls:
+                new_node4 = Node((node.position[0]-1, node.position[1]+1), node)
+                successors.append(new_node4)
+        '''
+        #west
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                new_node5 = Node((node.position[0]-1, node.position[1]), node)
+                successors.append(new_node5)
+        #south west
+        '''
+        if node.position[0]-1 >= 0 and node.position[1]-1 >= 0:
+            if (node.position[0]-1, node.position[1]-1) not in self.map.walls:
+                new_node6 = Node((node.position[0]-1, node.position[1]-1), node)
+                successors.append(new_node6)
+        '''
+
+        #south
         if node.position[1]-1 >= 0:
             if (node.position[0], node.position[1]-1) not in self.map.walls:
-                new_node4 = Node((node.position[0], node.position[1]-1), node)
-                successors.append(new_node4)
+                new_node7 = Node((node.position[0], node.position[1]-1), node)
+                successors.append(new_node7)
+        '''
+        #south east
+        if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]-1 >= 0:
+            if (node.position[0]+1, node.position[1]-1) not in self.map.walls:
+                new_node8 = Node((node.position[0]+1, node.position[1]-1), node)
+                successors.append(new_node8)
+        '''
 
         return successors
 
@@ -116,8 +149,6 @@ class Search(object):
 
         self.addToOpenlist(initial_node)
         #Agenda loop
-        count = 0
-
         best_path_so_far = [list(),list()]
 
         while True:
@@ -125,24 +156,19 @@ class Search(object):
                 print "openlist is empty, no solution"
                 break
 
-            print best_path_so_far
-
             node = self.removeFromOpenlist()
+            self.closedlist.append(node)
+            self.count += 1
+
+            #GUI
             path = self.getPath(node,path=[])
             best_path_so_far[1] = path
-            #GUI
-
             paintPath(best_path_so_far[0],best_path_so_far[1])
-
-
-            self.map.grid[node.position[0]][node.position[1]] = 'o'
-            self.count += 1
-            self.closedlist.append(node)
 
             if node.position == self.goal:
                 #display path, break the while loop
                 print "solution found"
-                print "pathlength: %d" % (self.pathlength)
+                print "pathlength: %d" % (len(path))
                 print "number of searchnodes: %d\n" %(self.count)
                 break
             #adds to the open list
@@ -155,7 +181,6 @@ class Search(object):
                 if self.unique(successor):
                     #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
-
                     self.addToOpenlist(successor)
 
                 elif node.g_cost + successor.move_cost < successor.g_cost:
@@ -254,8 +279,6 @@ def paintPath(old_path_list,path_list):
             x = node.position[0]
             y = node.position[1]
             paintSingleSquare(x,y,grid,"grey")
-
-
 
     for node in reversed(path_list):
         x = node.position[0]
