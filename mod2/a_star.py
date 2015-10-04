@@ -74,13 +74,13 @@ class Node(object):
 
 class Search(object):
 
-    def __init__(self, gac):
+    def __init__(self, gui):
         self.openlist = []
         heapq.heapify(self.openlist)
         self.closedlist = []
         self.states = {}
         self.assumtions = 0
-        self.gac = gac
+        self.gui = gui
 
     def makeStringFromList(self, list):
         result = ""
@@ -98,11 +98,12 @@ class Search(object):
     def a_star(self):
             # creating initial node
             # Setter opp første node og dens state
-            domains = self.gac.graph.domains
+            domains = self.gui.gac.graph.domains
             # Kjører gac med full domains
-            self.gac.runGAC(domains, assumed=None)
+            self.gui.gac.runGAC(domains, assumed=None)
             node = Node(domains,None)
             heapq.heappush(self.openlist, node)
+            self.gui.mainloop()
 
             #AGENDA LOOP
             while True:
@@ -110,72 +111,38 @@ class Search(object):
                     print "openlist is empty, no solution"
                     return
                 node = heapq.heappop(self.openlist)
+                print node.state
+                self.gui.drawDomains(node.state)
+                self.gui.update()
+
                 solution, successors = node.generateSuccerssors(node, self)
                 #print successors
+
                 if solution:
                     print solution
                     print "THIS IS THE FUCKING SOPULTIONB!!!!!!!!3<3<3<3<3"
                     print self.assumtions
-                    return
+                    return solution
                 for suc in successors:
 
                     heapq.heappush(self.openlist, suc)
-                '''
-                successors = node.generateSuccerssors()
-                # generate successors
-                for successor in successors:
-                    generateUID(Node(runGac(successor), node))
-'''
 
-
-            '''
-            #Agenda loop
-            count = 0
-            while True:
-
-                #self.map.printMap()
-                self.count += 1
-                self.closedlist.append(node)
-                if node.position == self.goal:
-                    #display path, break the while loop
-                    print "solution found"
-                    self.draw_path_to_map(node)
-                    paintPath(self.path)
-                    self.map.printMap()
-                    print "pathlength: %d" % (self.pathlength)
-                    print "number of searchnodes: %d\n" %(self.count)
-                    break
-                #adds to the open list
-
-                self.successors = self.generate_successor_astar(node)
-                shuffle(self.successors)
-                for successor in self.successors:
-                    node.appendkid(successor)
-                    #Sjekker om successor node finnes i open- eller closedlist
-                    if self.unique(successor):
-                        #Hvis successor er unik, fiks all info til den og sett den i openlist
-                        self.attach_eval(successor, node)
-                        heapq.heappush(self.openlist, successor)
-                    elif node.g_cost + successor.move_cost < successor.g_cost:
-                        #hvis ikke
-                        self.attach_eval(successor,node)
-                        if successor in self.closedlist:
-                            propagate_path_improvements(successor)
-                '''
 
 
 class GUI(tk.Tk):
-    def __init__(self, graph):
+    def __init__(self, gac):
         tk.Tk.__init__(self)
-        self.graph = graph
+        self.graph = gac.graph
         self.graph_size = 800.0
         self.vertex_size = 10.0
+        self.gac = gac
 
         self.ixy, self.x_size, self.y_size = self.getIXY()
 
         self.canvas = tk.Canvas(self, width = self.graph_size+50, height = self.graph_size+50, borderwidth = 0)
         self.canvas.pack(side="top", fill="both", expand="true")
         self.oval = {}
+
 
         for edge in self.graph.edges:
 
@@ -195,12 +162,25 @@ class GUI(tk.Tk):
             y2 = y1 + self.vertex_size
 
             self.oval[vertex[1], vertex[2]] = self.canvas.create_oval(x1, y1, x2, y2, outline="black", fill="gray80", tag="oval")
-
+            
         print self.oval
+
 
         #Place the window in the topmost left corner to prevent glitches in the gui
         #self.canvas.xview_moveto(0)
         #self.canvas.yview_moveto(0)
+    def setOvalColor(self, node_x, node_y, color):
+        self.canvas.itemconfig(self.oval[node_x,node_y], fill=color)
+
+    def drawDomains(self, domains):
+        print domains
+        for domain in domains:
+            i = int(domain[1:])
+            node_x = self.graph.ixy[i][1]
+            node_y = self.graph.ixy[i][2]
+            print "ASD"
+
+            self.setOvalColor(node_x, node_y, domains[domain])
 
     def getIXY(self):
         ixy = self.graph.ixy
@@ -224,7 +204,6 @@ class GUI(tk.Tk):
                 y_min = index[2]
 
         if x_min<0:
-            print "a"
             x_size = x_max-x_min
             for index in ixy:
                 index[1] += abs(x_min)
@@ -232,14 +211,11 @@ class GUI(tk.Tk):
             x_size = x_max
 
         if y_min<0:
-            print "b"
             y_size = y_max-y_min
             for index in ixy:
                 index[2] += abs(y_min)
         else:
             y_size = y_max
-
-        print x_min
 
         return ixy, x_size, y_size
 
@@ -283,7 +259,7 @@ for constraint in range(len(edges)):
     for node in range(len(edges[constraint])):
         edges[constraint][node] = int(edges[constraint][node])
 
-domain = [0,1,2,3]
+domain = ["red","blue","yellow","orange","cyan",]
 g = Graph(ixy,edges,domain,nv)
 '''
 g.domains["n18"] = [1]
@@ -296,19 +272,22 @@ g.domains["n13"] = [0]
 
 '''
 #g.domains["n3"] = [3]
-#lag GUI
-gui = GUI(g)
-gui.mainloop()
 # Kjører GAC første gang
 gac = GAC(g)
+#lag GUI
+
+gui = GUI(gac)
+
 # Returnerer (Bool,{domains})
 """
 result = gac.runGAC(gac.graph.domains)
 done = result[0]
 filtered_initial_domains = result[1]
 """
-search = Search(gac)
-#search.a_star()
+search = Search(gui)
+search.a_star()
+
+
 print "The rum time is %s secounds"%(time.time()-start_time)
 # Lager UID
 #initial_uid = search.generateUID(filtered_initial_domains)
