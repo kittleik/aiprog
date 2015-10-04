@@ -6,6 +6,7 @@ from Tkinter import *
 import time
 from node import Node
 from grid import Grid
+from kart import Kart
 
 inFile = sys.argv[1]
 
@@ -19,6 +20,13 @@ class Search(object):
         self.pathlength = 0
         self.path = []
 
+    def getPath(self, node, path):
+        path.append(node)
+        if node.parent == None:
+            return path
+        else:
+            return self.getPath(node.parent, path)
+
     # HEURISTIC
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
@@ -26,25 +34,58 @@ class Search(object):
     # SUCCESSORS
     def generate_successor_astar(self, node):
         successors = []
+        #east
         if node.position[0]+1 <= self.map.mapsize[0]-1:
             if (node.position[0]+1, node.position[1]) not in self.map.walls:
                 new_node1 = Node((node.position[0]+1, node.position[1]), node)
                 successors.append(new_node1)
 
-        if node.position[1]+1 <= self.map.mapsize[1]-1:
-            if (node.position[0], node.position[1]+1) not in self.map.walls:
-                new_node2 = Node((node.position[0], node.position[1]+1), node)
+        #north east
+        '''
+        if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0]+1, node.position[1]+1) not in self.map.walls:
+                new_node2 = Node((node.position[0]+1, node.position[1]+1), node)
                 successors.append(new_node2)
 
-        if node.position[0]-1 >= 0:
-            if (node.position[0]-1, node.position[1]) not in self.map.walls:
-                new_node3 = Node((node.position[0]-1, node.position[1]), node)
+        '''
+        #north
+        if node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0], node.position[1]+1) not in self.map.walls:
+                new_node3 = Node((node.position[0], node.position[1]+1), node)
                 successors.append(new_node3)
 
+        #north west
+        '''
+        if node.position[0]-1 >= 0 and node.position[1]+1 <= self.map.mapsize[1]-1:
+            if (node.position[0]-1, node.position[1]+1) not in self.map.walls:
+                new_node4 = Node((node.position[0]-1, node.position[1]+1), node)
+                successors.append(new_node4)
+        '''
+        #west
+        if node.position[0]-1 >= 0:
+            if (node.position[0]-1, node.position[1]) not in self.map.walls:
+                new_node5 = Node((node.position[0]-1, node.position[1]), node)
+                successors.append(new_node5)
+        #south west
+        '''
+        if node.position[0]-1 >= 0 and node.position[1]-1 >= 0:
+            if (node.position[0]-1, node.position[1]-1) not in self.map.walls:
+                new_node6 = Node((node.position[0]-1, node.position[1]-1), node)
+                successors.append(new_node6)
+        '''
+
+        #south
         if node.position[1]-1 >= 0:
             if (node.position[0], node.position[1]-1) not in self.map.walls:
-                new_node4 = Node((node.position[0], node.position[1]-1), node)
-                successors.append(new_node4)
+                new_node7 = Node((node.position[0], node.position[1]-1), node)
+                successors.append(new_node7)
+        '''
+        #south east
+        if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]-1 >= 0:
+            if (node.position[0]+1, node.position[1]-1) not in self.map.walls:
+                new_node8 = Node((node.position[0]+1, node.position[1]-1), node)
+                successors.append(new_node8)
+        '''
 
         return successors
 
@@ -109,26 +150,28 @@ class Search(object):
 
         self.addToOpenlist(initial_node)
         #Agenda loop
-        count = 0
+        best_path_so_far = [list(),list()]
+
         while True:
             if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
 
             node = self.removeFromOpenlist()
-
-            self.map.grid[node.position[0]][node.position[1]] = 'o'
-            self.count += 1
             self.closedlist.append(node)
+            self.count += 1
+
+            #GUI
+            path = self.getPath(node,path=[])
+            best_path_so_far[1] = path
+            paintPath(best_path_so_far[0],best_path_so_far[1])
 
             if node.position == self.goal:
                 #display path, break the while loop
                 print "solution found"
-                self.draw_path_to_map(node)
-                paintPath(self.path)
-                self.map.printMap()
-                print "pathlength: %d" % (self.pathlength)
+                print "pathlength: %d" % (len(path))
                 print "number of searchnodes: %d\n" %(self.count)
+
                 break
             #adds to the open list
             self.successors = self.generate_successor_astar(node)
@@ -138,17 +181,20 @@ class Search(object):
                 node.appendkid(successor)
                 #Sjekker om successor node finnes i open- eller closedlist
                 if self.unique(successor):
+                    print "openlist: " + str(len(self.openlist))
+                    print "closedlist: " + str(len(self.closedlist))
                     #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
-
                     self.addToOpenlist(successor)
 
+
                 elif node.g_cost + successor.move_cost < successor.g_cost:
+
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
-                paintSingleSquare(successor.position[0],successor.position[1],grid.width,"cyan")
-                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],grid.width,"yellow")
+
+            best_path_so_far[0] = path
 
 
 #==================RUNNING PROGRAM=======================================
@@ -187,20 +233,15 @@ def switchMode(string):
 
 def reset():
     global grid_copy
-    paintMap(grid_copy.grid)
+    paintMap(grid_copy.grid,maxCoordinates(width,height))
 
 topFrame = Frame(root)
 topFrame.pack()
 bottomFrame = Frame(root)
 bottomFrame.pack(side=BOTTOM)
 
-w = Canvas(topFrame, width=500, height=500)
+w = Canvas(topFrame, width=1000, height=1000)
 paint_list = []
-def callback():
-    x = random.randint(0,19)
-    y = random.randint(0,19)
-    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="yellow", outline = 'white')
-    #root.after(1000, callback)
 #----------Menu--------------
 menu = Menu(root)
 root.config(menu=menu)
@@ -222,44 +263,70 @@ map_Menu.add_command(label="Map5", command=chooseMap)
 map_Menu.add_command(label="Map6", command=chooseMap)
 
 #---------Paint map----------
-w = Canvas(topFrame, width=400, height=420)
+w = Canvas(topFrame, width=900, height=920)
 
-def paintSingleSquare(x,y,the_map,fill):
-    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
+
+paintsOnMap = {}
+def maxCoordinates(width,height):
+    return (width*20,height*20)
+
+def paintSingleSquare(x,y,maxCoord,fill):
+    maxY = maxCoord[1]
+    key = str(x) + "." + str(y)
+    square = paintsOnMap[key]
+    w.delete(square)
+    paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill=fill, outline = 'white')
     #time.sleep(0.01)
-    root.update()
+    #root.update()
 
-def paintPath(path_list):
+def paintPath(old_path_list,path_list):
+
+    if len(old_path_list) > 0:
+        for node in reversed(old_path_list):
+            x = node.position[0]
+            y = node.position[1]
+            paintSingleSquare(x,y,maxCoordinates(width,height),"grey")
+
     for node in reversed(path_list):
         x = node.position[0]
         y = node.position[1]
-        paintSingleSquare(x,y,grid,"red")
-        #time.sleep(0.01)
-        root.update()
+        paintSingleSquare(x,y, maxCoordinates(width,height),"red")
+    root.update()
 
-def paintMap(grid):
+
+def paintMap(grid, maxCoord):
+    w.delete("all")
+    maxX = maxCoord[0]
+    maxY = maxCoord[1]
     x = 0
     y = 0
 
     for i in grid:
         for j in i:
             if j == '#':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill="black", outline = 'white')
+
                 y += 1
             elif j == 'S':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill="green", outline = 'white')
                 y += 1
             elif j == 'G':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill="blue", outline = 'white')
                 y += 1
             elif j == 'x':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxy-20*y, fill="cyan", outline = 'white')
                 y += 1
             elif j == 'o':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill="red", outline = 'white')
                 y += 1
             else:
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+                key = str(x)+"."+str(y)
+                paintsOnMap[key] = w.create_rectangle(20*x, (maxY-20)-20*y ,20+20*x,maxY-20*y, fill="grey", outline = 'white')
                 y += 1
         y = 0
         x += 1
@@ -273,5 +340,5 @@ def start():
 button1 = Button(bottomFrame, text="start", fg="red", command=start)
 button1.pack()
 
-paintMap(grid.grid)
+paintMap(grid.grid, maxCoordinates(width,height))
 root.mainloop()
