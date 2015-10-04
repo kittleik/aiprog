@@ -9,6 +9,7 @@ import heapq, Queue
 import copy
 import time
 import Tkinter as tk
+import os
 
 start_time = time.time()
 
@@ -162,29 +163,51 @@ class Search(object):
 class GUI(tk.Tk):
     def __init__(self, graph):
         tk.Tk.__init__(self)
-        self.graph = copy.deepcopy(graph)
+        self.graph = Graph(graph[0],graph[1],graph[2],graph[3])
         self.gac = GAC(self.graph)
         self.search = Search(self.gac)
         self.graph_size = 800.0
         self.vertex_size = 10.0
+
+
 
         self.ixy, self.x_size, self.y_size = self.getIXY()
 
         self.canvas = tk.Canvas(self, width = self.graph_size+50, height = self.graph_size+50, borderwidth = 0)
         self.canvas.pack(side="top", fill="both", expand="true")
 
+        menubar = tk.Menu(self)
 
-        self.solveButton = tk.Button(self.canvas, text="solve", command=self.drawSolution)
-        self.startAnimationButton = tk.Button(self.canvas, text="start ani", command=self.startAnimation)
-        self.stopAnimationButton = tk.Button(self.canvas, text="stop ani", command=self.resetGraph)
-        self.incrementButton = tk.Button(self.canvas, text="increment", command=self.incrementSolution)
-        self.resetButton = tk.Button(self.canvas, text="reset", command=self.resetGraph)
+        commandmenu = tk.Menu(menubar)
+        commandmenu.add_command(label="solve", command=self.drawSolution)
+        commandmenu.add_command(label="start ani", command=self.startAnimation)
+        commandmenu.add_command(label="stop ani", command=self.resetGraph)
+        commandmenu.add_command(label="increment", command=self.incrementSolution)
+        commandmenu.add_command(label="reset", command=self.resetGraph)
+        menubar.add_cascade(label="Commands", menu=commandmenu)
 
-        self.solveButton.pack(side="right")
-        self.startAnimationButton.pack(side="right")
-        self.stopAnimationButton.pack(side="right")
-        self.incrementButton.pack(side="right")
-        self.resetButton.pack(side="right")
+        execmenu = tk.Menu(menubar)
+        execmenu.add_command(label="2 Colors", command= lambda: self.changeColors('2'))
+        execmenu.add_command(label="3 Colors", command= lambda: self.changeColors('3'))
+        execmenu.add_command(label="4 Colors", command= lambda: self.changeColors('4'))
+        execmenu.add_command(label="5 Colors", command= lambda: self.changeColors('5'))
+        execmenu.add_command(label="6 Colors", command= lambda: self.changeColors('6'))
+        execmenu.add_command(label="7 Colors", command= lambda: self.changeColors('7'))
+        execmenu.add_command(label="8 Colors", command= lambda: self.changeColors('8'))
+        execmenu.add_command(label="9 Colors", command= lambda: self.changeColors('9'))
+        execmenu.add_command(label="10 Colors", command= lambda: self.changeColors('10'))
+        menubar.add_cascade(label="Colors", menu=execmenu)
+
+        mapMenu = tk.Menu(menubar)
+        mapMenu.add_command(label="graph-color-2", command= lambda: self.changeMap('graph-color-2.txt'))
+        mapMenu.add_command(label="rand-50", command= lambda: self.changeMap('rand-50-4-color1.txt'))
+        mapMenu.add_command(label="test", command= lambda: self.changeMap('test.txt'))
+        mapMenu.add_command(label="spiral-500", command= lambda: self.changeMap('spiral-500-4-color1.txt'))
+        mapMenu.add_command(label="graph-color-1", command= lambda: self.changeMap('graph-color-1.txt'))
+        mapMenu.add_command(label="rand-100-6", command= lambda: self.changeMap('rand-100-6-color1.txt'))
+        mapMenu.add_command(label="rand-100-4", command= lambda: self.changeMap('rand-100-4-color1.txt'))
+        menubar.add_cascade(label="Maps", menu=mapMenu)
+        self.config(menu=menubar)
 
         self.oval = {}
 
@@ -218,6 +241,12 @@ class GUI(tk.Tk):
             self.drawDomains(self.search.incremental_a_star().state)
             self.after(50, self.animateSolution)
 
+    def changeMap(self,mapFileName):
+        print mapFileName
+        os.execl(sys.executable, 'python', __file__, mapFileName, sys.argv[2])
+
+    def changeColors(self,nod):
+        os.execl(sys.executable, 'python', __file__, sys.argv[1], nod)
 
     def incrementSolution(self):
         self.drawDomains(self.search.incremental_a_star().state)
@@ -230,8 +259,7 @@ class GUI(tk.Tk):
         self.drawDomains(domains)
 
     def resetGraph(self):
-        for oval in self.oval:
-            self.setOvalColor(oval, "gray80")
+        os.execl(sys.executable, 'python', __file__, *sys.argv[1:])
 
     def setOvalColor(self, i, color):
         self.canvas.itemconfig(self.oval[i], fill=color)
@@ -294,7 +322,6 @@ onlyNumbers = re.compile('\-?\d+(?:\.\d+)?')
 instructions = [onlyNumbers.findall(line) for line in open(inFile, 'r')]
 #instructions = [[int(y) for y in x] for x in instructions]
 # number of variables
-
 nv = int(instructions[0][0])
 
 # number of edges
@@ -316,10 +343,9 @@ for constraint in range(len(edges)):
     for node in range(len(edges[constraint])):
         edges[constraint][node] = int(edges[constraint][node])
 domain_count = int(sys.argv[2])
-print domain_count
 domain = ["red","blue","yellow","orange","cyan","green","plum", "black", "azure","brown"]
 domain = domain[:domain_count]
-g = Graph(ixy,edges,domain,nv)
+g = (ixy,edges,domain,nv)
 '''
 g.domains["n18"] = [1]
 g.domains["n12"] = [2]
