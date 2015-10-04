@@ -19,6 +19,13 @@ class Search(object):
         self.pathlength = 0
         self.path = []
 
+    def getPath(self, node, path):
+        path.append(node)
+        if node.parent == None:
+            return path
+        else:
+            return self.getPath(node.parent, path)
+
     # HEURISTIC
     def calculate_heuristic(self , position, goal):
         return abs(position[0]- goal[0]) + abs(position[1]-goal[1])
@@ -110,12 +117,21 @@ class Search(object):
         self.addToOpenlist(initial_node)
         #Agenda loop
         count = 0
+
+        best_path_so_far = [list(),list()]
+
         while True:
             if len(self.openlist) == 0:
                 print "openlist is empty, no solution"
                 break
 
+            print best_path_so_far
+
             node = self.removeFromOpenlist()
+            path = self.getPath(node,path=[])
+            best_path_so_far[1] = path
+            #GUI
+            paintPath(best_path_so_far[0],best_path_so_far[1])
 
             self.map.grid[node.position[0]][node.position[1]] = 'o'
             self.count += 1
@@ -124,9 +140,6 @@ class Search(object):
             if node.position == self.goal:
                 #display path, break the while loop
                 print "solution found"
-                self.draw_path_to_map(node)
-                paintPath(self.path)
-                self.map.printMap()
                 print "pathlength: %d" % (self.pathlength)
                 print "number of searchnodes: %d\n" %(self.count)
                 break
@@ -149,6 +162,8 @@ class Search(object):
                         propagate_path_improvements(successor)
                 paintSingleSquare(successor.position[0],successor.position[1],grid.width,"cyan")
                 paintSingleSquare(successor.parent.position[0],successor.parent.position[1],grid.width,"yellow")
+
+            best_path_so_far[0] = path
 
 
 #==================RUNNING PROGRAM=======================================
@@ -227,15 +242,22 @@ w = Canvas(topFrame, width=400, height=420)
 def paintSingleSquare(x,y,the_map,fill):
     w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
     #time.sleep(0.01)
-    root.update()
+    #root.update()
 
-def paintPath(path_list):
+def paintPath(old_path_list,path_list):
+
+    if len(old_path_list) > 0:
+        for node in reversed(old_path_list):
+            x = node.position[0]
+            y = node.position[1]
+            paintSingleSquare(x,y,grid,"cyan")
+
     for node in reversed(path_list):
         x = node.position[0]
         y = node.position[1]
         paintSingleSquare(x,y,grid,"red")
         #time.sleep(0.01)
-        root.update()
+    root.update()
 
 def paintMap(grid):
     x = 0
