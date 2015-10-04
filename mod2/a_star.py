@@ -180,8 +180,7 @@ class GUI(tk.Tk):
 
         commandmenu = tk.Menu(menubar)
         commandmenu.add_command(label="solve", command=self.drawSolution)
-        commandmenu.add_command(label="start ani", command=self.startAnimation)
-        commandmenu.add_command(label="stop ani", command=self.resetGraph)
+        commandmenu.add_command(label="start animation", command=self.startAnimation)
         commandmenu.add_command(label="increment", command=self.incrementSolution)
         commandmenu.add_command(label="reset", command=self.resetGraph)
         menubar.add_cascade(label="Commands", menu=commandmenu)
