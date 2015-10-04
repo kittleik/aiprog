@@ -131,7 +131,9 @@ class Search(object):
             path = self.getPath(node,path=[])
             best_path_so_far[1] = path
             #GUI
+
             paintPath(best_path_so_far[0],best_path_so_far[1])
+
 
             self.map.grid[node.position[0]][node.position[1]] = 'o'
             self.count += 1
@@ -160,8 +162,6 @@ class Search(object):
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
-                paintSingleSquare(successor.position[0],successor.position[1],grid.width,"cyan")
-                paintSingleSquare(successor.parent.position[0],successor.parent.position[1],grid.width,"yellow")
 
             best_path_so_far[0] = path
 
@@ -238,9 +238,12 @@ map_Menu.add_command(label="Map6", command=chooseMap)
 
 #---------Paint map----------
 w = Canvas(topFrame, width=400, height=420)
-
+abc = {}
 def paintSingleSquare(x,y,the_map,fill):
-    w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
+    key = str(x) + "." + str(y)
+    square = abc[key]
+    w.delete(square)
+    abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill=fill, outline = 'white')
     #time.sleep(0.01)
     #root.update()
 
@@ -250,38 +253,49 @@ def paintPath(old_path_list,path_list):
         for node in reversed(old_path_list):
             x = node.position[0]
             y = node.position[1]
-            paintSingleSquare(x,y,grid,"cyan")
+            paintSingleSquare(x,y,grid,"grey")
+
+
 
     for node in reversed(path_list):
         x = node.position[0]
         y = node.position[1]
         paintSingleSquare(x,y,grid,"red")
-        #time.sleep(0.01)
+
     root.update()
 
+
 def paintMap(grid):
+    w.delete("all")
     x = 0
     y = 0
 
     for i in grid:
         for j in i:
             if j == '#':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="black", outline = 'white')
+
                 y += 1
             elif j == 'S':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="green", outline = 'white')
                 y += 1
             elif j == 'G':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="blue", outline = 'white')
                 y += 1
             elif j == 'x':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="cyan", outline = 'white')
                 y += 1
             elif j == 'o':
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="red", outline = 'white')
                 y += 1
             else:
-                w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
+                key = str(x)+"."+str(y)
+                abc[key] = w.create_rectangle(20*x, (400-20)-20*y ,20+20*x,400-20*y, fill="grey", outline = 'white')
                 y += 1
         y = 0
         x += 1
