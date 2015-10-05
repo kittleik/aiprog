@@ -184,8 +184,8 @@ class Search(object):
                     self.addToOpenlist(successor)
 
 
-                elif node.g_cost + successor.move_cost < successor.g_cost:
-
+                elif node.g_cost + successor.move_cost < successor.parent.g_cost:
+                    print "asd"
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
