@@ -46,7 +46,6 @@ class Search(object):
             if (node.position[0]+1, node.position[1]+1) not in self.map.walls:
                 new_node2 = Node((node.position[0]+1, node.position[1]+1), node)
                 successors.append(new_node2)
-
         '''
         #north
         if node.position[1]+1 <= self.map.mapsize[1]-1:
@@ -181,8 +180,6 @@ class Search(object):
                 node.appendkid(successor)
                 #Sjekker om successor node finnes i open- eller closedlist
                 if self.unique(successor):
-                    print "openlist: " + str(len(self.openlist))
-                    print "closedlist: " + str(len(self.closedlist))
                     #Hvis successor er unik, fiks all info til den og sett den i openlist
                     self.attach_eval(successor, node)
                     self.addToOpenlist(successor)

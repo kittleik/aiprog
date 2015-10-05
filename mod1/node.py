@@ -9,16 +9,16 @@ class Node(object):
         self.position = position
 
     #heapen sorterer etter f verdien til noden
-
+    '''
     def __lt__(self, other):
         if self.f_cost == other.f_cost:
             return self.h_cost < other.h_cost
         return self.f_cost < other.f_cost
-        '''
+    '''
     def __cmp__(self, other):
         if other == None:
-            return
+            return -1
         return cmp(self.f_cost, other.f_cost)
-        '''
+
     def appendkid(self, node):
         self.kids.append(node)
