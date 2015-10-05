@@ -1,6 +1,5 @@
 import sys
 import re
-import os
 import heapq, Queue
 from random import shuffle
 from Tkinter import *
@@ -142,7 +141,6 @@ class Search(object):
         self.goal = self.map.goal
         print "the goal is at  %s" % (self.goal,)
 
-        move_cost = 1
         initial_node = Node(self.start,None)
         initial_node.g_cost = 0
         initial_node.h_cost = self.calculate_heuristic(initial_node.position, self.goal)
@@ -175,7 +173,7 @@ class Search(object):
                 break
             #adds to the open list
             self.successors = self.generate_successor_astar(node)
-            shuffle(self.successors)
+            #shuffle(self.successors)
 
             for successor in self.successors:
                 node.appendkid(successor)
@@ -215,9 +213,8 @@ grid_copy = Grid(width, height, start, goal, walls)
 root = Tk()
 mode = "dfs"
 
-def chooseMap(mapFileName):
+def chooseMap():
     print "Ma lage dette for a endre map"
-    os.execl(sys.executable, 'python', __file__, mapFileName)
 
 def switchMode(string):
     global mode
@@ -254,14 +251,12 @@ algorithm_Menu.add_command(label="Reset", command=reset)
 #subMenu.add_separator()
 map_Menu = Menu(menu)
 menu.add_cascade(label="Maps", menu=map_Menu)
-map_Menu.add_command(label="Map0", command=lambda :chooseMap("task0.txt"))
-map_Menu.add_command(label="Map1", command=lambda :chooseMap("task1.txt"))
-map_Menu.add_command(label="Map2", command=lambda :chooseMap("task2.txt"))
-map_Menu.add_command(label="Map3", command=lambda :chooseMap("task3.txt"))
-map_Menu.add_command(label="Map4", command=lambda :chooseMap("task4.txt"))
-map_Menu.add_command(label="Map5", command=lambda :chooseMap("task5.txt"))
-map_Menu.add_command(label="Map6", command=lambda :chooseMap("task6.txt"))
-map_Menu.add_command(label="Map7", command=lambda :chooseMap("task7.txt"))
+map_Menu.add_command(label="Map1", command=chooseMap)
+map_Menu.add_command(label="Map2", command=chooseMap)
+map_Menu.add_command(label="Map3", command=chooseMap)
+map_Menu.add_command(label="Map4", command=chooseMap)
+map_Menu.add_command(label="Map5", command=chooseMap)
+map_Menu.add_command(label="Map6", command=chooseMap)
 
 #---------Paint map----------
 w = Canvas(topFrame, width=900, height=920)
