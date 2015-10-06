@@ -7,8 +7,9 @@ class GAC:
         self.columns = columns
         self.rows = rows
         self.domains = self.construct_domains()
-        for i in self.domains:
-            print self.domains[i]
+        print self.domains
+
+
 
     def construct_domains(self):
         domains = {}
@@ -40,30 +41,36 @@ class GAC:
 
                 temp_domains.append(dl)
                 index_addition += self.columns[1][i][x] + 1
-
             temp_domains = self.getAllPairs(temp_domains)
+            print temp_domains
             domains_block_index["c_"+str(i)] = self.simpleDomainFiltering(temp_domains)
-
+            print domains_block_index["c_"+str(i)]
+            #print self.setDomain(domains_block_index["c_"+str(i)][0], self.columns[1][0])
             for q in range(len(domains_block_index["c_"+str(i)])):
-                domains["c_"+str(i)].append(self.setDomain(domains_block_index["c_"+str(i)][q], self.columns[1][q]))
+
+                domains["c_"+str(i)].append(self.setDomain(domains_block_index["c_"+str(i)][q], self.columns[1][i]))
 
 
         return domains
 
     def setDomain(self, block_pos, block_size):
         print block_pos
+        print block_size
+
         domain = ['_']*self.columns[0]
-        for i in range(len(block_size)):
+
+        for i in range(len(block_pos)):
             for x in range(block_size[i]):
                 domain[block_pos[i]+x] = '#'
-
+        print domain
         return domain
                 #if self.checkConstraint(i[])
                 #return
     def simpleDomainFiltering(self,d_list):
         ret_list = copy.copy(d_list)
+        counter = 0
         for a in range(len(d_list)):
-            counter = 0
+
             #print temp_domains[a]
             for b in range(len(d_list[a])-1):
                 if not self.checkConstraint(d_list[a][b],d_list[a][b+1]):
@@ -79,7 +86,7 @@ class GAC:
 
     def checkConstraint(self, x,y):
         if x+1 < y:
-             return True
+            return True
         return False
 
     def createConstraints(self,edges):
