@@ -3,6 +3,8 @@ import re
 import os
 import Tkinter as tk
 from gac import GAC
+from search import Search
+
 
 class GUI(tk.Tk):
     def __init__(self, columns, rows):
@@ -10,9 +12,13 @@ class GUI(tk.Tk):
         self.columns = columns
         self.rows = rows
         self.gac = GAC(columns,rows)
-
+        self.search = Search(self.gac)
+        solution = self.search.a_star()
+        "ASDASDJKASHDKAJSD"
         self.canvas = tk.Canvas(self, width = 800, height = 800, borderwidth = 0)
         self.canvas.pack(side="top", fill="both", expand="true")
+
+
 
         menubar = tk.Menu(self)
 
