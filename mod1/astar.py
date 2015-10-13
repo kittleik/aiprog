@@ -7,6 +7,7 @@ import time
 from node import Node
 from grid import Grid
 from kart import Kart
+import os
 
 inFile = sys.argv[1]
 
@@ -45,6 +46,7 @@ class Search(object):
         if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]+1 <= self.map.mapsize[1]-1:
             if (node.position[0]+1, node.position[1]+1) not in self.map.walls:
                 new_node2 = Node((node.position[0]+1, node.position[1]+1), node)
+                new_node2.move_cost = 14
                 successors.append(new_node2)
         '''
         #north
@@ -58,6 +60,7 @@ class Search(object):
         if node.position[0]-1 >= 0 and node.position[1]+1 <= self.map.mapsize[1]-1:
             if (node.position[0]-1, node.position[1]+1) not in self.map.walls:
                 new_node4 = Node((node.position[0]-1, node.position[1]+1), node)
+                new_node4.move_cost = 14
                 successors.append(new_node4)
         '''
         #west
@@ -70,6 +73,7 @@ class Search(object):
         if node.position[0]-1 >= 0 and node.position[1]-1 >= 0:
             if (node.position[0]-1, node.position[1]-1) not in self.map.walls:
                 new_node6 = Node((node.position[0]-1, node.position[1]-1), node)
+                new_node6.move_cost = 14
                 successors.append(new_node6)
         '''
 
@@ -83,6 +87,7 @@ class Search(object):
         if node.position[0]+1 <= self.map.mapsize[0]-1 and node.position[1]-1 >= 0:
             if (node.position[0]+1, node.position[1]-1) not in self.map.walls:
                 new_node8 = Node((node.position[0]+1, node.position[1]-1), node)
+                new_node8.move_cost = 14
                 successors.append(new_node8)
         '''
 
@@ -125,6 +130,7 @@ class Search(object):
             self.openlist.append(node)
         if mode == "astar":
             heapq.heappush(self.openlist, node)
+            heapq.heapify(self.openlist)
 
     def removeFromOpenlist(self):
         if mode == "dfs":
@@ -144,6 +150,7 @@ class Search(object):
         initial_node = Node(self.start,None)
         initial_node.g_cost = 0
         initial_node.h_cost = self.calculate_heuristic(initial_node.position, self.goal)
+        print initial_node.h_cost
         initial_node.f_cost = initial_node.g_cost + initial_node.h_cost
 
         self.addToOpenlist(initial_node)
@@ -166,6 +173,10 @@ class Search(object):
 
             if node.position == self.goal:
                 #display path, break the while loop
+                totcost = 0
+                for node in path:
+                    totcost += node.move_cost
+                print totcost
                 print "solution found"
                 print "pathlength: %d" % (len(path))
                 print "number of searchnodes: %d\n" %(self.count)
@@ -173,7 +184,8 @@ class Search(object):
                 break
             #adds to the open list
             self.successors = self.generate_successor_astar(node)
-            #shuffle(self.successors)
+
+            shuffle(self.successors)
 
             for successor in self.successors:
                 node.appendkid(successor)
@@ -184,12 +196,10 @@ class Search(object):
                     self.addToOpenlist(successor)
 
 
-                elif node.g_cost + successor.move_cost < successor.parent.g_cost:
-                    print "asd"
+                if node.g_cost + successor.move_cost < successor.parent.g_cost:
                     self.attach_eval(successor,node)
                     if successor in self.closedlist:
                         propagate_path_improvements(successor)
-
             best_path_so_far[0] = path
 
 
@@ -211,7 +221,7 @@ grid_copy = Grid(width, height, start, goal, walls)
 
 # ------Tkinter-----------
 root = Tk()
-mode = "dfs"
+mode = "astar"
 
 def chooseMap():
     print "Ma lage dette for a endre map"
@@ -251,16 +261,20 @@ algorithm_Menu.add_command(label="Reset", command=reset)
 #subMenu.add_separator()
 map_Menu = Menu(menu)
 menu.add_cascade(label="Maps", menu=map_Menu)
-map_Menu.add_command(label="Map1", command=chooseMap)
-map_Menu.add_command(label="Map2", command=chooseMap)
-map_Menu.add_command(label="Map3", command=chooseMap)
-map_Menu.add_command(label="Map4", command=chooseMap)
-map_Menu.add_command(label="Map5", command=chooseMap)
-map_Menu.add_command(label="Map6", command=chooseMap)
+map_Menu.add_command(label="Map1", command=lambda: changeMap('task1.txt'))
+map_Menu.add_command(label="Map2", command=lambda: changeMap('task2.txt'))
+map_Menu.add_command(label="Map3", command=lambda: changeMap('task3.txt'))
+map_Menu.add_command(label="Map4", command=lambda: changeMap('task4.txt'))
+map_Menu.add_command(label="Map5", command=lambda: changeMap('task5.txt'))
+map_Menu.add_command(label="Map6", command=lambda: changeMap('task6.txt'))
+map_Menu.add_command(label="Map7", command=lambda: changeMap('task7.txt'))
 
 #---------Paint map----------
 w = Canvas(topFrame, width=900, height=920)
 
+def changeMap(mapFileName):
+        print mapFileName
+        os.execl(sys.executable, 'python', __file__, mapFileName)
 
 paintsOnMap = {}
 def maxCoordinates(width,height):

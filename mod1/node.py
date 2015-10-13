@@ -18,7 +18,7 @@ class Node(object):
     def __cmp__(self, other):
         if other == None:
             return -1
-        return cmp(self.g_cost, other.g_cost)
+        return cmp(self.f_cost, other.f_cost)
 
     def appendkid(self, node):
         self.kids.append(node)
