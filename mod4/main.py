@@ -3,6 +3,7 @@ from board import Board
 import time
 import random
 import sys
+import copy
 
 window = GameWindow()
 
@@ -26,7 +27,12 @@ window.update_view( b.generateState(b.grid) )
 
 
 while True:
+    window.update_view( b.generateState(b.grid) )
     print b.points
+    print "---before---"
+    gridBeforeMove = copy.deepcopy(b.grid)
+    print gridBeforeMove
+    print "------------"
     movement_choice = raw_input("Make your move::::>>>>    ")
     if movement_choice == "exit":
         break
@@ -50,28 +56,41 @@ while True:
         b.rightAddition(b.grid)
         window.update_view( b.generateState(b.grid) )
 
-    row_indexes_with_zero = []
-    column_indexes_with_zero = []
+    gridAfterMove = copy.deepcopy(b.grid)
+    print "---after---"
+    print "before: " + str(gridBeforeMove)
+    print "after: " + str(gridAfterMove)
+
+    changed = False
 
     for i in range(0,4):
+        if changed:
+            break
         for j in range(0,4):
-            if b.grid[i][j] == 0:
-                row_indexes_with_zero.append(i)
-                column_indexes_with_zero.append(j)
-            if grid[i][j] == 2048:
-                print "YOU WIN"
+            if gridBeforeMove[i][j] != gridAfterMove[i][j]:
+                changed = True
                 break
-    if len(row_indexes_with_zero) > 1:
-        random_index = row_indexes_with_zero.index(random.choice(row_indexes_with_zero))
-        row_to_place_next = row_indexes_with_zero[random_index]
-        column_to_place_next = column_indexes_with_zero[random_index]
-        b.grid[row_to_place_next][column_to_place_next] = 1
-    elif len(row_indexes_with_zero) == 1:
-        row_to_place_next = row_indexes_with_zero[0]
-        column_to_place_next = column_indexes_with_zero[0]
-        b.grid[row_to_place_next][column_to_place_next] = 1
-    else:
-        break
+
+    if changed:
+        available_spots = []
+
+        for i in range(0,4):
+            for j in range(0,4):
+                if b.grid[i][j] == 0:
+                    available_spots.append((i,j))
+                if b.grid[i][j] == 2048:
+                    print "YOU WIN"
+                    break
+        print "availspots: " + str(available_spots)
+        if len(available_spots) > 1:
+            next_spot = random.choice(available_spots)
+            b.grid[next_spot[0]][next_spot[1]] = 1
+        elif len(available_spots) == 1:
+            next_spot = available_spots[0]
+            b.grid[next_spot[0]][next_spot[1]] = 1
+        else:
+            break
+        print "nextspot: " + str(next_spot)
 print "Congratulations!! You scored ", str(b.points), "points"
 
 
