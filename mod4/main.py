@@ -6,13 +6,15 @@ import sys
 import copy
 
 window = GameWindow()
-
+#Setting up game grid first time
 grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 firstPieceRow = random.randint(0,3)
 firstPieceColumn = random.randint(0,3)
 grid[firstPieceRow][firstPieceColumn] = 1
 secondPieceRow = random.randint(0,3)
 secondPieceColumn = random.randint(0,3)
+b = Board(grid)
+window.update_view( b.generateState(b.grid) )
 
 while True:
     if firstPieceRow == secondPieceRow and firstPieceColumn == secondPieceRow:
@@ -26,6 +28,7 @@ b = Board(grid)
 window.update_view( b.generateState(b.grid) )
 
 
+
 while True:
     window.update_view( b.generateState(b.grid) )
     print b.points
@@ -37,26 +40,22 @@ while True:
     if movement_choice == "exit":
         break
     elif movement_choice == "w":
-        b.swipeUp(b.grid)
-        b.upAddition(b.grid)
+        b.upAddition(b.swipeUp(b.grid))
         window.update_view( b.generateState(b.grid) )
 
     elif movement_choice == "a":
-        b.swipeLeft(b.grid)
-        b.leftAddition(b.grid)
+        b.leftAddition(b.swipeLeft(b.grid))
         window.update_view( b.generateState(b.grid) )
 
     elif movement_choice == "s":
-        b.swipeDown(b.grid)
-        b.downAddition(b.grid)
+        b.downAddition(b.swipeDown(b.grid))
         window.update_view( b.generateState(b.grid) )
 
     elif movement_choice == "d":
-        b.swipeRight(b.grid)
-        b.rightAddition(b.grid)
+        b.rightAddition(b.swipeRight(b.grid))
         window.update_view( b.generateState(b.grid) )
 
-    gridAfterMove = copy.deepcopy(b.grid)
+    gridAfterMove = b.grid
     print "---after---"
     print "before: " + str(gridBeforeMove)
     print "after: " + str(gridAfterMove)
