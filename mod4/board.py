@@ -76,6 +76,7 @@ class Board():
                 grid[i+3][j] = 0
 
         print grid
+        return grid
 
 
     def swipeDown(self, grid):
@@ -124,7 +125,7 @@ class Board():
                 self.points += grid[i+1][j] ** 2
                 grid[i][j] = 0
         print grid
-
+        return grid
 
     def swipeLeft(self, grid):
         j = 0
@@ -172,6 +173,7 @@ class Board():
                 self.points += grid[i][j+2] ** 2
                 grid[i][j+3] = 0
         print grid
+        return grid
 
     def swipeRight(self, grid):
         j = 0
@@ -219,3 +221,4 @@ class Board():
                 self.points += grid[i][j+1] ** 2
                 grid[i][j] = 0
         print grid
+        return grid
