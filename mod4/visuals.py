@@ -2,7 +2,7 @@ from Tkinter import *
 
 GRID_LEN              = 4
 GRID_PADDING          = 10
-SIZE                  = 500
+SIZE                  = 700
 
 BACKGROUND_COLOR_GAME       = "#92877d"
 BACKGROUND_COLOR_CELL_EMPTY = "#9e948a"
@@ -30,16 +30,34 @@ BACKGROUND_COLOR_DICT       = {
 
 
 class GameWindow(Frame):
-    def __init__(self):
+    def __init__(self, master=None):
         Frame.__init__(self)
-
+        self.master = master
+        self.init_window()
         self.grid()
-        self.master.title('2048')
-
         self.grid_cells = []
         self.init_grid()
         self.update_view( (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) )
+
     #end
+
+    def init_window(self):
+        self.master.title('2048')
+        self.pack(fill=BOTH, expand=1)
+        menu = Menu(self.master)
+        self.master.config(menu=menu)
+
+
+        options = Menu(menu)
+        options.add_command(label='Play',command=None)
+        options.add_command(label='Quit',command=None)
+        menu.add_cascade(label='Options', menu=options)
+
+        playButton = Button(self, text="Quit")
+
+
+
+
 
     def init_grid(self):
         background = Frame(self, bg = BACKGROUND_COLOR_GAME, width = SIZE, height = SIZE )

@@ -59,20 +59,23 @@ class Board():
         for j in range(0,4):
             if grid[i][j] == grid[i+1][j] and grid[i][j] != 0:
                 grid[i][j] += 1
-                self.points += grid[i][j] ** 2
+                print "to be added :" + str(2 ** grid[i][j])
+                self.points += 2 ** grid[i][j]
                 grid[i+1][j] = grid[i+2][j]
                 grid[i+2][j] = grid[i+3][j]
                 grid[i+3][j] = 0
 
             if grid[i+1][j] == grid[i+2][j] and grid[i+1][j] != 0:
                 grid[i+1][j] += 1
-                self.points += grid[i+1][j] ** 2
+                print "to be added :" + str(2 ** grid[i+1][j])
+                self.points += 2 ** grid[i+1][j]
                 grid[i+2][j] = grid[i+3][j]
                 grid[i+3][j] = 0
 
             if grid[i+2][j] == grid[i+3][j] and grid[i+2][j] != 0:
                 grid[i+2][j] += 1
-                self.points += grid[i+1][j] ** 2
+                print "to be added :" + str(2 ** grid[i+1][j])
+                self.points += 2 ** grid[i+1][j]
                 grid[i+3][j] = 0
 
         print grid
@@ -109,20 +112,20 @@ class Board():
         for j in range(0,4):
             if grid[i+3][j] == grid[i+2][j] and grid[i+3][j] != 0:
                 grid[i+3][j] += 1
-                self.points += grid[i][j] ** 2
+                self.points += 2 ** grid[i+3][j]
                 grid[i+2][j] = grid[i+1][j]
                 grid[i+1][j] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i+2][j] == grid[i+1][j] and grid[i+2][j] != 0:
                 grid[i+2][j] += 1
-                self.points += grid[i+2][j] ** 2
+                self.points += 2 ** grid[i+2][j]
                 grid[i+1][j] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i+1][j] == grid[i][j] and grid[i+1][j] != 0:
                 grid[i+1][j] += 1
-                self.points += grid[i+1][j] ** 2
+                self.points += 2 ** grid[i+1][j]
                 grid[i][j] = 0
         print grid
         return grid
@@ -157,20 +160,20 @@ class Board():
         for i in range(0,4):
             if grid[i][j] == grid[i][j+1] and grid[i][j] != 0:
                 grid[i][j] += 1
-                self.points += grid[i][j] ** 2
+                self.points += 2 ** grid[i][j]
                 grid[i][j+1] = grid[i][j+2]
                 grid[i][j+2] = grid[i][j+3]
                 grid[i][j+3] = 0
 
             if grid[i][j+1] == grid[i][j+2] and grid[i][j+1] != 0:
                 grid[i][j+1] += 1
-                self.points += grid[i][j+1] ** 2
+                self.points += 2 ** grid[i][j+1]
                 grid[i][j+2] = grid[i][j+3]
                 grid[i][j+3] = 0
 
             if grid[i][j+2] == grid[i][j+3] and grid[i][j+2] != 0:
                 grid[i][j+2] += 1
-                self.points += grid[i][j+2] ** 2
+                self.points += 2 ** grid[i][j+2]
                 grid[i][j+3] = 0
         print grid
         return grid
@@ -205,20 +208,20 @@ class Board():
         for i in range(0,4):
             if grid[i][j+3] == grid[i][j+2] and grid[i][j+3] != 0:
                 grid[i][j+3] += 1
-                self.points += grid[i][j+3] ** 2
+                self.points += 2 ** grid[i][j+3]
                 grid[i][j+2] = grid[i][j+1]
                 grid[i][j+1] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i][j+2] == grid[i][j+1] and grid[i][j+2] != 0:
                 grid[i][j+2] += 1
-                self.points += grid[i][j+2] ** 2
+                self.points += 2 ** grid[i][j+2]
                 grid[i][j+1] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i][j+1] == grid[i][j] and grid[i][j+1] != 0:
                 grid[i][j+1] += 1
-                self.points += grid[i][j+1] ** 2
+                self.points += 2 ** grid[i][j+1]
                 grid[i][j] = 0
         print grid
         return grid

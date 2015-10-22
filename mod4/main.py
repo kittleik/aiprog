@@ -5,41 +5,39 @@ import random
 import sys
 import copy
 import math
+from Tkinter import *
 
 bestTile = 0
-
 
 def nextPiece():
     possible = [1,1,1,1,1,1,1,1,1,2]
     return random.choice(possible)
 
-window = GameWindow()
+root = Tk()
+window = GameWindow(root)
+
 #Setting up game grid first time
-
-
 grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-firstPieceRow = random.randint(0,3)
-firstPieceColumn = random.randint(0,3)
-grid[firstPieceRow][firstPieceColumn] = 1
-secondPieceRow = random.randint(0,3)
-secondPieceColumn = random.randint(0,3)
-b = Board(grid)
-window.update_view( b.generateState(b.grid) )
 
+#Adding first piece on the board
+firstPiece = (random.randint(0,3), random.randint(0,3))
+grid[firstPiece[0]][firstPiece[1]] = 1
+
+secondPiece = (random.randint(0,3), random.randint(0,3))
 while True:
-    if firstPieceRow == secondPieceRow and firstPieceColumn == secondPieceRow:
-        secondPieceRow = random.randint(0,3)
-        secondPieceColumn = random.randint(0,3)
+    if firstPiece == secondPiece:
+        secondPiece = (random.randint(0,3), random.randint(0,3))
     else:
-        grid[secondPieceRow][secondPieceColumn] = 1
         break
-
+#Adding second piece on the board
+grid[secondPiece[0]][secondPiece[1]] = 1
 b = Board(grid)
+#Updating UI
 window.update_view( b.generateState(b.grid) )
 
 while True:
     window.update_view( b.generateState(b.grid) )
-    print b.points
+    print "POINTS========> >  > " + str(b.points)
     print "---before---"
     gridBeforeMove = copy.deepcopy(b.grid)
     print gridBeforeMove
@@ -127,6 +125,4 @@ else:
     print "Your best tile is: " + str(int(math.pow(2,bestTile)))
     print "You scored ", str(b.points), "points"
 
-
-
-window.mainloop()
+root.mainloop()
