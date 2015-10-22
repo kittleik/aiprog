@@ -1,27 +1,31 @@
 from cell import Cell
-import numpy as np
+import random
+import copy
 
 class Board():
 
-    def __init__(self, grid):
-        self.grid = grid
+    def __init__(self):
+        self.grid = self.initGrid()
         self.state = self.generateState(self.grid)
         self.points = 0
-        #self.rows = [[0, 1, 2, 3],[4, 5, 6, 7],[8, 9, 10, 11],[12, 13, 14, 15]]
-        #self.columns = [[0, 4, 8, 12],[1, 5, 9, 13],[2, 6, 10, 14],[3, 7, 11, 15]]
+        self.bestTile = 0
 
+    def initGrid(self):
+        grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+        firstPiece = (random.randint(0,3), random.randint(0,3))
+        grid[firstPiece[0]][firstPiece[1]] = 1
 
-    def getColumns(self):
-        grid = np.array(list(self.grid))
-        columns = []
-        for i in range(len(grid)):
-            columns.append(grid[:,i])
-        return np.array(columns).tolist()
+        secondPiece = (random.randint(0,3), random.randint(0,3))
+        while True:
+            if firstPiece == secondPiece:
+                secondPiece = (random.randint(0,3), random.randint(0,3))
+            else:
+                break
+        grid[secondPiece[0]][secondPiece[1]] = 1
+        return grid
 
-    def getRows(self):
-        return list(self.grid)
-
-
+    #Turning grid [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]] into --> [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    #Using "state form" to update UI
     def generateState(self,grid):
         state = []
         for row in grid:
@@ -50,7 +54,7 @@ class Board():
                     while grid[i+2][j] == 0:
                         grid[i+2][j] = grid[i+3][j]
                         grid[i+3][j] = 0
-        print grid
+
         return grid
 
     def upAddition(self, grid):
@@ -77,8 +81,6 @@ class Board():
                 print "to be added :" + str(2 ** grid[i+1][j])
                 self.points += 2 ** grid[i+1][j]
                 grid[i+3][j] = 0
-
-        print grid
         return grid
 
 
@@ -103,7 +105,6 @@ class Board():
                     while grid[i+1][j] == 0:
                         grid[i+1][j] = grid[i][j]
                         grid[i][j] = 0
-        print grid
         return grid
 
     def downAddition(self, grid):
@@ -127,7 +128,6 @@ class Board():
                 grid[i+1][j] += 1
                 self.points += 2 ** grid[i+1][j]
                 grid[i][j] = 0
-        print grid
         return grid
 
     def swipeLeft(self, grid):
@@ -151,7 +151,6 @@ class Board():
                     while grid[i][j+2] == 0:
                         grid[i][j+2] = grid[i][j+3]
                         grid[i][j+3] = 0
-        print grid
         return grid
 
     def leftAddition(self, grid):
@@ -175,7 +174,6 @@ class Board():
                 grid[i][j+2] += 1
                 self.points += 2 ** grid[i][j+2]
                 grid[i][j+3] = 0
-        print grid
         return grid
 
     def swipeRight(self, grid):
@@ -199,7 +197,6 @@ class Board():
                     while grid[i][j+1] == 0:
                         grid[i][j+1] = grid[i][j]
                         grid[i][j] = 0
-        print grid
         return grid
 
     def rightAddition(self, grid):
@@ -223,5 +220,60 @@ class Board():
                 grid[i][j+1] += 1
                 self.points += 2 ** grid[i][j+1]
                 grid[i][j] = 0
-        print grid
         return grid
+
+    #Creating a piece with probability 90% for piece |2| and 10% for piece |4|
+    def generatePiece(self):
+        possible = [1,1,1,1,1,1,1,1,1,2]
+        return random.choice(possible)
+
+    def evaluateMove(self, before, after):
+        gridBeforeMove = copy.deepcopy(before)
+        gridAfterMove = copy.deepcopy(after)
+
+        changed = False
+        for i in range(0,4):
+            if changed:
+                break
+            for j in range(0,4):
+                if gridBeforeMove[i][j] != gridAfterMove[i][j]:
+                    changed = True
+                    break
+        if changed:
+            available_spots = []
+            for i in range(0,4):
+                for j in range(0,4):
+                    #updating best tile
+                    if gridAfterMove[i][j] > self.bestTile:
+                        self.bestTile = gridAfterMove[i][j]
+                    #appending available spots
+                    if gridAfterMove[i][j] == 0:
+                        available_spots.append((i,j))
+                    #evaluate if game is won
+                    if gridAfterMove[i][j] == 2048:
+                        print "YOU WIN"
+                        return "win"
+            if len(available_spots) > 1:
+                next_spot = random.choice(available_spots)
+                gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
+                return gridAfterMove
+            elif len(available_spots) == 1:
+                next_spot = available_spots[0]
+                gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
+                # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS
+                temp_grid = copy.deepcopy(gridAfterMove)
+                temp_grid_up = copy.deepcopy(gridAfterMove)
+                temp_grid_down = copy.deepcopy(gridAfterMove)
+                temp_grid_left = copy.deepcopy(gridAfterMove)
+                temp_grid_right = copy.deepcopy(gridAfterMove)
+
+                up = self.upAddition(self.swipeUp(temp_grid_up))
+                down = self.downAddition(self.swipeDown(temp_grid_down))
+                left = self.leftAddition(self.swipeLeft(temp_grid_left))
+                right = self.rightAddition(self.swipeRight(temp_grid_right))
+                if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
+                    return "lose"
+                else:
+                    return gridAfterMove
+        else:
+            return gridAfterMove

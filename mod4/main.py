@@ -1,128 +1,56 @@
 from visuals import GameWindow
 from board import Board
-import time
-import random
-import sys
-import copy
-import math
 from Tkinter import *
-
-bestTile = 0
-
-def nextPiece():
-    possible = [1,1,1,1,1,1,1,1,1,2]
-    return random.choice(possible)
+import random, sys, copy, time
 
 root = Tk()
 window = GameWindow(root)
+board = Board()
+window.update_view( board.generateState(board.grid) )
 
-#Setting up game grid first time
-grid = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-
-#Adding first piece on the board
-firstPiece = (random.randint(0,3), random.randint(0,3))
-grid[firstPiece[0]][firstPiece[1]] = 1
-
-secondPiece = (random.randint(0,3), random.randint(0,3))
+#INPUT LOOP
 while True:
-    if firstPiece == secondPiece:
-        secondPiece = (random.randint(0,3), random.randint(0,3))
-    else:
-        break
-#Adding second piece on the board
-grid[secondPiece[0]][secondPiece[1]] = 1
-b = Board(grid)
-#Updating UI
-window.update_view( b.generateState(b.grid) )
-
-while True:
-    window.update_view( b.generateState(b.grid) )
-    print "POINTS========> >  > " + str(b.points)
-    print "---before---"
-    gridBeforeMove = copy.deepcopy(b.grid)
-    print gridBeforeMove
-    print "------------"
+    window.update_view( board.generateState(board.grid) )
+    print "POINTS========> >  > " + str(board.points) + " <  < <========POINTS"
+    print "BEST-TILE = | " + str(2 ** board.bestTile) + " |"
+    gridBeforeMove = copy.deepcopy(board.grid)
     movement_choice = raw_input("Make your move::::>>>>    ")
     if movement_choice == "exit":
-        break
+        sys.exit(0)
     elif movement_choice == "w":
-        b.upAddition(b.swipeUp(b.grid))
-        window.update_view( b.generateState(b.grid) )
+        board.upAddition(board.swipeUp(board.grid))
+        window.update_view( board.generateState(board.grid) )
 
     elif movement_choice == "a":
-        b.leftAddition(b.swipeLeft(b.grid))
-        window.update_view( b.generateState(b.grid) )
+        board.leftAddition(board.swipeLeft(board.grid))
+        window.update_view( board.generateState(board.grid) )
 
     elif movement_choice == "s":
-        b.downAddition(b.swipeDown(b.grid))
-        window.update_view( b.generateState(b.grid) )
+        board.downAddition(board.swipeDown(board.grid))
+        window.update_view( board.generateState(board.grid) )
 
     elif movement_choice == "d":
-        b.rightAddition(b.swipeRight(b.grid))
-        window.update_view( b.generateState(b.grid) )
+        board.rightAddition(board.swipeRight(board.grid))
+        window.update_view( board.generateState(board.grid) )
 
-    gridAfterMove = b.grid
-    print "---after---"
-    print "before: " + str(gridBeforeMove)
-    print "after: " + str(gridAfterMove)
+    gridAfterMove = copy.deepcopy(board.grid)
+    #evaluating the game state after a move, win, lose or a valid move
+    evaluation = board.evaluateMove(gridBeforeMove, gridAfterMove)
+    if evaluation == "win":
+        break
+    elif evaluation == "lose":
+        break
+    else:
+        board.grid = evaluation
+        window.update_view( board.generateState(board.grid) )
 
-    changed = False
-
-    for i in range(0,4):
-        if changed:
-            break
-        for j in range(0,4):
-            if gridBeforeMove[i][j] != gridAfterMove[i][j]:
-                changed = True
-                break
-
-    if changed:
-        available_spots = []
-
-        for i in range(0,4):
-            for j in range(0,4):
-                if b.grid[i][j] > bestTile:
-                    bestTile = b.grid[i][j]
-                if b.grid[i][j] == 0:
-                    available_spots.append((i,j))
-                if b.grid[i][j] == 2048:
-                    print "YOU WIN"
-                    break
-        print "bestTile: " + str(int(math.pow(2,bestTile)))
-        print "availspots: " + str(available_spots)
-        print len(available_spots)
-        if len(available_spots) > 1:
-            next_spot = random.choice(available_spots)
-            b.grid[next_spot[0]][next_spot[1]] = nextPiece()
-        elif len(available_spots) == 1:
-            next_spot = available_spots[0]
-            b.grid[next_spot[0]][next_spot[1]] = nextPiece()
-            window.update_view( b.generateState(b.grid) )
-
-            # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS
-            temp_grid = copy.deepcopy(b.grid)
-            temp_grid_up = copy.deepcopy(b.grid)
-            temp_grid_down = copy.deepcopy(b.grid)
-            temp_grid_left = copy.deepcopy(b.grid)
-            temp_grid_right = copy.deepcopy(b.grid)
-
-            up = b.upAddition(b.swipeUp(temp_grid_up))
-            down = b.downAddition(b.swipeDown(temp_grid_down))
-            left = b.leftAddition(b.swipeLeft(temp_grid_left))
-            right = b.rightAddition(b.swipeRight(temp_grid_right))
-
-
-            if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
-                break
-        print "nextPiece: " + str(b.grid[next_spot[0]][next_spot[1]])
-        print "nextspot: " + str(next_spot)
-
+#Feedback about how the game went
 if bestTile >= 2048:
-    print "Your best tile is: " + str(int(math.pow(2,bestTile)))
-    print "Congratulations!! You scored ", str(b.points), "points"
+    print "Your best tile is: " + str(int(2 ** bestTile))
+    print "Congratulations!! You scored ", str(board.points), "points"
 else:
     print "YOU DIED"
-    print "Your best tile is: " + str(int(math.pow(2,bestTile)))
-    print "You scored ", str(b.points), "points"
+    print "Your best tile is: " + str(int(2 ** bestTile))
+    print "You scored ", str(board.points), "points"
 
 root.mainloop()

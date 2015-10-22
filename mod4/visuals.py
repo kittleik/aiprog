@@ -2,7 +2,7 @@ from Tkinter import *
 
 GRID_LEN              = 4
 GRID_PADDING          = 10
-SIZE                  = 700
+SIZE                  = 500
 
 BACKGROUND_COLOR_GAME       = "#92877d"
 BACKGROUND_COLOR_CELL_EMPTY = "#9e948a"
@@ -44,19 +44,24 @@ class GameWindow(Frame):
     def init_window(self):
         self.master.title('2048')
         self.pack(fill=BOTH, expand=1)
+
         menu = Menu(self.master)
         self.master.config(menu=menu)
 
-
-        options = Menu(menu)
-        options.add_command(label='Play',command=None)
-        options.add_command(label='Quit',command=None)
-        menu.add_cascade(label='Options', menu=options)
+        mode = Menu(menu)
+        mode.add_command(label='normal',command=lambda *args: self.switchMode("normal"))
+        mode.add_command(label='ai',command=lambda *args: self.switchMode("ai"))
+        menu.add_cascade(label='Mode', menu=mode)
 
         playButton = Button(self, text="Quit")
 
+    #MENU
 
-
+    def switchMode(self, mode):
+        if mode == "normal":
+            print "normal"
+        if mode == "ai":
+            print "ai"
 
 
     def init_grid(self):
