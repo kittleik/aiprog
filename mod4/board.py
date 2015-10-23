@@ -252,11 +252,11 @@ class Board():
                     #evaluate if game is won
                     if gridAfterMove[i][j] == 2048:
                         print "YOU WIN"
-                        return "win"
+                        return ("win", gridAfterMove)
             if len(available_spots) > 1:
                 next_spot = random.choice(available_spots)
                 gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
-                return gridAfterMove
+                return ("valid",gridAfterMove)
             elif len(available_spots) == 1:
                 next_spot = available_spots[0]
                 gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
@@ -272,8 +272,9 @@ class Board():
                 left = self.leftAddition(self.swipeLeft(temp_grid_left))
                 right = self.rightAddition(self.swipeRight(temp_grid_right))
                 if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
-                    return "lose"
+                    return ("lose",gridAfterMove)
                 else:
-                    return gridAfterMove
+                    return ("valid",gridAfterMove)
+
         else:
-            return gridAfterMove
+            return ("valid",gridAfterMove)

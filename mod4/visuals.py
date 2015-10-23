@@ -38,7 +38,6 @@ class GameWindow(Frame):
         self.grid_cells = []
         self.init_grid()
         self.update_view( (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) )
-
     #end
 
     def init_window(self):
