@@ -226,19 +226,25 @@ class Board():
     def generatePiece(self):
         possible = [1,1,1,1,1,1,1,1,1,2]
         return random.choice(possible)
-    #Evaluating a move returns ("win", grid), ("lose", grid) or ("valid", grid)
-    def evaluateMove(self, before, after):
-        gridBeforeMove = copy.deepcopy(before)
-        gridAfterMove = copy.deepcopy(after)
 
+    def changedAfterMove(self,before,after):
         changed = False
         for i in range(0,4):
             if changed:
                 break
             for j in range(0,4):
-                if gridBeforeMove[i][j] != gridAfterMove[i][j]:
+                if before[i][j] != after[i][j]:
                     changed = True
                     break
+        return changed
+
+    #Evaluating a move returns ("win", grid), ("lose", grid) or ("valid", grid)
+    def evaluateMove(self, before, after):
+        gridBeforeMove = copy.deepcopy(before)
+        gridAfterMove = copy.deepcopy(after)
+
+        changed = self.changedAfterMove(gridBeforeMove,gridAfterMove)
+
         if changed:
             available_spots = []
             for i in range(0,4):
