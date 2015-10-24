@@ -226,7 +226,7 @@ class Board():
     def generatePiece(self):
         possible = [1,1,1,1,1,1,1,1,1,2]
         return random.choice(possible)
-
+    #Evaluating a move returns ("win", grid), ("lose", grid) or ("valid", grid)
     def evaluateMove(self, before, after):
         gridBeforeMove = copy.deepcopy(before)
         gridAfterMove = copy.deepcopy(after)
@@ -260,7 +260,7 @@ class Board():
             elif len(available_spots) == 1:
                 next_spot = available_spots[0]
                 gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
-                # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS
+                # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS WHEN THERE IS NO EMPTY SPACES LEFT
                 temp_grid = copy.deepcopy(gridAfterMove)
                 temp_grid_up = copy.deepcopy(gridAfterMove)
                 temp_grid_down = copy.deepcopy(gridAfterMove)
@@ -278,3 +278,31 @@ class Board():
 
         else:
             return ("valid",gridAfterMove)
+
+    def gradientHeuristic(self,grid):
+        gradients = [
+                    [[ 3,  2,  1,  0],
+                     [ 2,  1,  0, -1],
+                     [ 1,  0, -1, -2],
+                     [ 0, -1, -2, -3]],
+                    [[ 0,  1,  2,  3],
+                     [-1,  0,  1,  2],
+                     [-2, -1,  0,  1],
+                     [-3, -2, -1, -0]],
+                    [[ 0, -1, -2, -3],
+                     [ 1,  0, -1, -2],
+                     [ 2,  1,  0, -1],
+                     [ 3,  2,  1,  0]],
+                    [[-3, -2, -1,  0],
+                     [-2, -1,  0,  1],
+                     [-1,  0,  1,  2],
+                     [ 0,  1,  2,  3]]
+                    ]
+        values = [0, 0, 0, 0]
+        print grid
+        for i in range(0,4):
+            for x in range(0,4):
+                for y in range(0,4):
+                    values[i] += gradients[i][x][y] * grid[x][y]
+        print values
+        return max(values)

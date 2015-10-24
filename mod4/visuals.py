@@ -26,9 +26,6 @@ BACKGROUND_COLOR_DICT       = {
                                 16 : '#FFAE00'
                             }
 
-
-
-
 class GameWindow(Frame):
     def __init__(self, master=None):
         Frame.__init__(self)
