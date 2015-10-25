@@ -10,13 +10,14 @@ board = Board()
 window.update_view( board.generateState(board.grid) )
 solver = Solver(board, window, root)
 #modes: random, upleftdownright, partialAI, onestepahead
-solver.startSolver("onestepahead")
+solver.startSolver("expectimax")
 
 
 
-#board.grid = [[2,2,4,5],[2,2,4,4],[2,2,4,4],[6,2,4,4]]
-#print board.gradientHeuristic(board.grid)
-#print solver.lookOneStepAhead(board.grid)
+#board.grid = [[0,1,2,3],[1,2,3,4],[2,3,4,6],[3,4,6,10]]
+#window.update_view(board.generateState(board.grid))
+
+
 
 
 root.mainloop()

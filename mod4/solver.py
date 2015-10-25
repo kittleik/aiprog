@@ -8,16 +8,45 @@ class Solver():
         self.gui = gui
 
 
-    def move(self, state, depth):
-        if depth == 0:
-            utility = self.board.gradientHeuristic(state)
+    def expectimax(self, grid, depth, agentIndex):
+        player = 0
+        rand = 1
 
-    #TODO: generate next steps based on a state
-    #parameter: grid
+        if depth <= 0:
+            return [ self.getUtility(grid), 0 ]
+
+        if agentIndex == player:
+            best = [0, 0]
+            for action in range(0,4):
+                next_grid_list = self.board.updateGrid(grid, action)
+                next_grid = next_grid_list[0]
+                moved = next_grid_list[1]
+                if not moved:
+                    continue
+                value_list = self.expectimax(next_grid, depth - 1, rand)
+                value = value_list[0]
+                if value >= best[0]:
+                    best = [value, action]
+            return best
+        else:
+            grid_options = self.board.getNextGridOptions(grid)
+            best = 0
+            for grid_option in grid_options:
+                next_grid = grid_option[0]
+                probability = grid_option[1]
+                value_list = self.expectimax(next_grid, depth - 1, player)
+                value = value_list[0]
+                best = best + value * probability
+            return [best, 0]
+
+
+
+    def getUtility(self,grid):
+        return self.board.gradientHeuristic(grid)
+
     def generateNextState(self, state):
         currentState = state
         self.gui.update_view(self.board.generateState(state))
-        print self.board.gradientHeuristic(state)
 
     def lookOneStepAhead(self, state):
         temp_grid = copy.deepcopy(state)
@@ -42,7 +71,6 @@ class Solver():
             values.append(( self.board.gradientHeuristic(right) , "right"))
 
         sorted_values = sorted(values, key=itemgetter(0), reverse=True)
-        print sorted_values
         return sorted_values.pop(0)
 
 
@@ -71,6 +99,17 @@ class Solver():
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
 
+    def converNumberToDirection(self, number):
+        if number == 0:
+            return "up"
+        if number == 1:
+            return "left"
+        if number == 2:
+            return "down"
+        if number == 3:
+            return "right"
+
+
     def nextMove(self,mode,lastMove):
         if mode == "upleftdownright":
             if lastMove == "up":
@@ -85,14 +124,18 @@ class Solver():
             return random.choice(["up","down","left","right"])
         elif mode == "onestepahead":
             return self.lookOneStepAhead(self.board.grid)[1]
+        elif mode == "expectimax":
+            return self.converNumberToDirection(self.expectimax(self.board.grid, 4, 0)[1])
         else:
             print "THIS H.WARD GAAAAAY"
 
     def startSolver(self,mode):
         self.gui.update_view(self.board.generateState(self.board.grid))
         self.root.update()
-        moveTodo = self.lookOneStepAhead(self.board.grid)
+        moveTodo = self.converNumberToDirection(self.expectimax(self.board.grid, 4, 0)[1])
+        print moveTodo
         #moveTodo = "up"
+
         while True:
             print "POINTS========> >  > " + str(self.board.points) + " <  < <========POINTS"
             print "BEST-TILE = | " + str(2 ** self.board.bestTile) + " |"

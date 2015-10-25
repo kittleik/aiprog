@@ -63,7 +63,6 @@ class Board():
         for j in range(0,4):
             if grid[i][j] == grid[i+1][j] and grid[i][j] != 0:
                 grid[i][j] += 1
-                print "to be added :" + str(2 ** grid[i][j])
                 self.points += 2 ** grid[i][j]
                 grid[i+1][j] = grid[i+2][j]
                 grid[i+2][j] = grid[i+3][j]
@@ -71,14 +70,12 @@ class Board():
 
             if grid[i+1][j] == grid[i+2][j] and grid[i+1][j] != 0:
                 grid[i+1][j] += 1
-                print "to be added :" + str(2 ** grid[i+1][j])
                 self.points += 2 ** grid[i+1][j]
                 grid[i+2][j] = grid[i+3][j]
                 grid[i+3][j] = 0
 
             if grid[i+2][j] == grid[i+3][j] and grid[i+2][j] != 0:
                 grid[i+2][j] += 1
-                print "to be added :" + str(2 ** grid[i+1][j])
                 self.points += 2 ** grid[i+1][j]
                 grid[i+3][j] = 0
         return grid
@@ -222,6 +219,27 @@ class Board():
                 grid[i][j] = 0
         return grid
 
+    # todo, find a way to skip point update on every call of movement
+    def updateGrid(self, grid, action):
+        gridBeforeMove = copy.deepcopy(grid)
+        if action == 0:
+            gridAfterMove = self.upAddition(self.swipeUp(copy.deepcopy(gridBeforeMove)))
+            changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
+            return [gridAfterMove, changedAfterMove]
+        if action == 1:
+            gridAfterMove = self.leftAddition(self.swipeLeft(copy.deepcopy(gridBeforeMove)))
+            changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
+            return [gridAfterMove, changedAfterMove]
+        if action == 2:
+            gridAfterMove = self.downAddition(self.swipeDown(copy.deepcopy(gridBeforeMove)))
+            changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
+            return [gridAfterMove, changedAfterMove]
+        if action == 3:
+            gridAfterMove = self.rightAddition(self.swipeRight(copy.deepcopy(gridBeforeMove)))
+            changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
+            return [gridAfterMove, changedAfterMove]
+
+
     #Creating a piece with probability 90% for piece |2| and 10% for piece |4|
     def generatePiece(self):
         possible = [1,1,1,1,1,1,1,1,1,2]
@@ -236,7 +254,30 @@ class Board():
                 if before[i][j] != after[i][j]:
                     changed = True
                     break
+
         return changed
+    def getNextGridOptions(self, grid):
+        grid_options = []
+        availableCells = self.availableCells(grid)
+        numOfAvailableCells = len(availableCells)
+        for cell in availableCells:
+            next_grid = copy.deepcopy(grid)
+            next_grid[cell[0]][cell[1]] = 1
+            grid_options.append([next_grid, 0.9 / numOfAvailableCells])
+            next_grid = copy.deepcopy(grid)
+            next_grid[cell[0]][cell[1]] = 2
+            grid_options.append([next_grid, 0.1 / numOfAvailableCells])
+        return grid_options
+
+
+    def availableCells(self, grid):
+        available_cells = []
+        for i in range(0,4):
+            for j in range(0,4):
+                if grid[i][j] == 0:
+                    available_cells.append((i,j))
+        return available_cells
+
 
     #Evaluating a move returns ("win", grid), ("lose", grid) or ("valid", grid)
     def evaluateMove(self, before, after):
@@ -305,10 +346,9 @@ class Board():
                      [ 0,  1,  2,  3]]
                     ]
         values = [0, 0, 0, 0]
-        print grid
         for i in range(0,4):
             for x in range(0,4):
                 for y in range(0,4):
-                    values[i] += gradients[i][x][y] * grid[x][y]
-        print values
+                    values[i] += gradients[i][x][y] * ( 2 ** grid[x][y] )
+                    print values
         return max(values)
