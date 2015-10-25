@@ -125,12 +125,12 @@ class Solver():
         elif mode == "onestepahead":
             return self.lookOneStepAhead(self.board.grid)[1]
         elif mode == "expectimax":
-            if len(self.board.availableCells(self.board.grid)) > 7:
-                depth = 4
-            elif len(self.board.availableCells(self.board.grid)) > 12:
-                depth = 5
-            elif len(self.board.availableCells(self.board.grid)) > 14:
+            if len(self.board.availableCells(self.board.grid)) < 2:
                 depth = 6
+            elif len(self.board.availableCells(self.board.grid)) > 2 and len(self.board.availableCells(self.board.grid)) <= 4:
+                depth = 5
+            elif len(self.board.availableCells(self.board.grid)) > 4 and len(self.board.availableCells(self.board.grid)) <= 7:
+                depth = 4
             else:
                 depth = 3
             return self.converNumberToDirection(self.expectimax(self.board.grid, depth, 0)[1])
