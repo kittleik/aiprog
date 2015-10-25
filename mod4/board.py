@@ -350,5 +350,4 @@ class Board():
             for x in range(0,4):
                 for y in range(0,4):
                     values[i] += gradients[i][x][y] * ( 2 ** grid[x][y] )
-                    print values
         return max(values)

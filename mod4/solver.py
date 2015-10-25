@@ -125,14 +125,22 @@ class Solver():
         elif mode == "onestepahead":
             return self.lookOneStepAhead(self.board.grid)[1]
         elif mode == "expectimax":
-            return self.converNumberToDirection(self.expectimax(self.board.grid, 4, 0)[1])
+            if len(self.board.availableCells(self.board.grid)) > 7:
+                depth = 4
+            elif len(self.board.availableCells(self.board.grid)) > 12:
+                depth = 5
+            elif len(self.board.availableCells(self.board.grid)) > 14:
+                depth = 6
+            else:
+                depth = 3
+            return self.converNumberToDirection(self.expectimax(self.board.grid, depth, 0)[1])
         else:
             print "THIS H.WARD GAAAAAY"
 
     def startSolver(self,mode):
         self.gui.update_view(self.board.generateState(self.board.grid))
         self.root.update()
-        moveTodo = self.converNumberToDirection(self.expectimax(self.board.grid, 4, 0)[1])
+        moveTodo = self.converNumberToDirection(self.expectimax(self.board.grid, 3, 0)[1])
         print moveTodo
         #moveTodo = "up"
 
