@@ -42,7 +42,44 @@ class Solver():
 
 
     def getUtility(self,grid):
-        return self.board.gradientHeuristic(grid)
+        if len(self.board.availableCells(grid)) == 0:
+            if self.board.isEnd(grid):
+                return 0
+        """gradients = [
+
+                    [[ 3,  2,  1,  0],
+                     [ 2,  1,  0, -1],
+                     [ 1,  0, -1, -2],
+                     [ 0, -1, -2, -3]],
+                    [[ 0,  1,  2,  3],
+                     [-1,  0,  1,  2],
+                     [-2, -1,  0,  1],
+                     [-3, -2, -1, -0]],
+                    [[ 0, -1, -2, -3],
+                     [ 1,  0, -1, -2],
+                     [ 2,  1,  0, -1],
+                     [ 3,  2,  1,  0]],
+                    [[-3, -2, -1,  0],
+                     [-2, -1,  0,  1],
+                     [-1,  0,  1,  2],
+                     [ 0,  1,  2,  3]]
+                    ]
+        gradients = [[10,8,7,6.5],
+                    [.5,.7,1,3],
+                    [-.5,-1.5,-1.8,-2],
+                    [-3.8,-3.7,-3.5,-3]]"""
+
+        gradients = [[13.58,12.19,10.28,9.99],
+                    [9.98,8.88,7.67,7.24],
+                    [6.07,5.63,3.71,1.62],
+                    [1.25,0.99,0.58,0.34]]
+
+        value = 0
+        for x in range(0,4):
+            for y in range(0,4):
+                value += gradients[x][y] * ( 2 ** grid[x][y] )
+
+        return value + len(self.board.availableCells(grid))*25
 
     def generateNextState(self, state):
         currentState = state
@@ -55,10 +92,10 @@ class Solver():
         temp_grid_left = copy.deepcopy(state)
         temp_grid_right = copy.deepcopy(state)
 
-        up = self.board.upAddition(self.board.swipeUp(temp_grid_up))
-        down = self.board.downAddition(self.board.swipeDown(temp_grid_down))
-        left = self.board.leftAddition(self.board.swipeLeft(temp_grid_left))
-        right = self.board.rightAddition(self.board.swipeRight(temp_grid_right))
+        up = self.board.upAddition(self.board.swipeUp(temp_grid_up),False)
+        down = self.board.downAddition(self.board.swipeDown(temp_grid_down),False)
+        left = self.board.leftAddition(self.board.swipeLeft(temp_grid_left),False)
+        right = self.board.rightAddition(self.board.swipeRight(temp_grid_right),False)
 
         values = []
         if self.board.changedAfterMove(temp_grid, up):
@@ -79,23 +116,23 @@ class Solver():
     def doMove(self, move):
         if move == "up":
             print "up"
-            self.board.upAddition(self.board.swipeUp(self.board.grid))
+            self.board.upAddition(self.board.swipeUp(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
 
         if move == "down":
             print "down"
-            self.board.downAddition(self.board.swipeDown(self.board.grid))
+            self.board.downAddition(self.board.swipeDown(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "left":
             print "left"
-            self.board.leftAddition(self.board.swipeLeft(self.board.grid))
+            self.board.leftAddition(self.board.swipeLeft(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "right":
             print "right"
-            self.board.rightAddition(self.board.swipeRight(self.board.grid))
+            self.board.rightAddition(self.board.swipeRight(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
 
@@ -126,11 +163,11 @@ class Solver():
             return self.lookOneStepAhead(self.board.grid)[1]
         elif mode == "expectimax":
             if len(self.board.availableCells(self.board.grid)) < 2:
-                depth = 6
-            elif len(self.board.availableCells(self.board.grid)) > 2 and len(self.board.availableCells(self.board.grid)) <= 4:
                 depth = 5
-            elif len(self.board.availableCells(self.board.grid)) > 4 and len(self.board.availableCells(self.board.grid)) <= 7:
+            elif len(self.board.availableCells(self.board.grid)) > 2 and len(self.board.availableCells(self.board.grid)) <= 4:
                 depth = 4
+            elif len(self.board.availableCells(self.board.grid)) > 4 and len(self.board.availableCells(self.board.grid)) <= 7:
+                depth = 3
             else:
                 depth = 3
             return self.converNumberToDirection(self.expectimax(self.board.grid, depth, 0)[1])

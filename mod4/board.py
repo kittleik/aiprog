@@ -57,27 +57,32 @@ class Board():
 
         return grid
 
-    def upAddition(self, grid):
+    def upAddition(self, grid, explore):
         i = 0
 
         for j in range(0,4):
             if grid[i][j] == grid[i+1][j] and grid[i][j] != 0:
                 grid[i][j] += 1
-                self.points += 2 ** grid[i][j]
+                if not explore:
+                    self.points += 2 ** grid[i][j]
                 grid[i+1][j] = grid[i+2][j]
                 grid[i+2][j] = grid[i+3][j]
                 grid[i+3][j] = 0
 
             if grid[i+1][j] == grid[i+2][j] and grid[i+1][j] != 0:
                 grid[i+1][j] += 1
-                self.points += 2 ** grid[i+1][j]
+                if not explore:
+                    self.points += 2 ** grid[i+1][j]
                 grid[i+2][j] = grid[i+3][j]
                 grid[i+3][j] = 0
 
             if grid[i+2][j] == grid[i+3][j] and grid[i+2][j] != 0:
                 grid[i+2][j] += 1
-                self.points += 2 ** grid[i+1][j]
+                if not explore:
+                    self.points += 2 ** grid[i+1][j]
                 grid[i+3][j] = 0
+        if not explore:
+            print self.points
         return grid
 
 
@@ -104,27 +109,32 @@ class Board():
                         grid[i][j] = 0
         return grid
 
-    def downAddition(self, grid):
+    def downAddition(self, grid, explore):
         i = 0
 
         for j in range(0,4):
             if grid[i+3][j] == grid[i+2][j] and grid[i+3][j] != 0:
                 grid[i+3][j] += 1
-                self.points += 2 ** grid[i+3][j]
+                if not explore:
+                    self.points += 2 ** grid[i+3][j]
                 grid[i+2][j] = grid[i+1][j]
                 grid[i+1][j] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i+2][j] == grid[i+1][j] and grid[i+2][j] != 0:
                 grid[i+2][j] += 1
-                self.points += 2 ** grid[i+2][j]
+                if not explore:
+                    self.points += 2 ** grid[i+2][j]
                 grid[i+1][j] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i+1][j] == grid[i][j] and grid[i+1][j] != 0:
                 grid[i+1][j] += 1
-                self.points += 2 ** grid[i+1][j]
+                if not explore:
+                    self.points += 2 ** grid[i+1][j]
                 grid[i][j] = 0
+        if not explore:
+            print self.points
         return grid
 
     def swipeLeft(self, grid):
@@ -150,27 +160,32 @@ class Board():
                         grid[i][j+3] = 0
         return grid
 
-    def leftAddition(self, grid):
+    def leftAddition(self, grid, explore):
         j = 0
 
         for i in range(0,4):
             if grid[i][j] == grid[i][j+1] and grid[i][j] != 0:
                 grid[i][j] += 1
-                self.points += 2 ** grid[i][j]
+                if not explore:
+                    self.points += 2 ** grid[i][j]
                 grid[i][j+1] = grid[i][j+2]
                 grid[i][j+2] = grid[i][j+3]
                 grid[i][j+3] = 0
 
             if grid[i][j+1] == grid[i][j+2] and grid[i][j+1] != 0:
                 grid[i][j+1] += 1
-                self.points += 2 ** grid[i][j+1]
+                if not explore:
+                    self.points += 2 ** grid[i][j+1]
                 grid[i][j+2] = grid[i][j+3]
                 grid[i][j+3] = 0
 
             if grid[i][j+2] == grid[i][j+3] and grid[i][j+2] != 0:
                 grid[i][j+2] += 1
-                self.points += 2 ** grid[i][j+2]
+                if not explore:
+                    self.points += 2 ** grid[i][j+2]
                 grid[i][j+3] = 0
+        if not explore:
+            print self.points
         return grid
 
     def swipeRight(self, grid):
@@ -196,46 +211,51 @@ class Board():
                         grid[i][j] = 0
         return grid
 
-    def rightAddition(self, grid):
+    def rightAddition(self, grid, explore):
         j = 0
 
         for i in range(0,4):
             if grid[i][j+3] == grid[i][j+2] and grid[i][j+3] != 0:
                 grid[i][j+3] += 1
-                self.points += 2 ** grid[i][j+3]
+                if not explore:
+                    self.points += 2 ** grid[i][j+3]
                 grid[i][j+2] = grid[i][j+1]
                 grid[i][j+1] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i][j+2] == grid[i][j+1] and grid[i][j+2] != 0:
                 grid[i][j+2] += 1
-                self.points += 2 ** grid[i][j+2]
+                if not explore:
+                    self.points += 2 ** grid[i][j+2]
                 grid[i][j+1] = grid[i][j]
                 grid[i][j] = 0
 
             if grid[i][j+1] == grid[i][j] and grid[i][j+1] != 0:
                 grid[i][j+1] += 1
-                self.points += 2 ** grid[i][j+1]
+                if not explore:
+                    self.points += 2 ** grid[i][j+1]
                 grid[i][j] = 0
+        if not explore:
+            print self.points
         return grid
 
     # todo, find a way to skip point update on every call of movement
     def updateGrid(self, grid, action):
         gridBeforeMove = copy.deepcopy(grid)
         if action == 0:
-            gridAfterMove = self.upAddition(self.swipeUp(copy.deepcopy(gridBeforeMove)))
+            gridAfterMove = self.upAddition(self.swipeUp(copy.deepcopy(gridBeforeMove)),True)
             changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
             return [gridAfterMove, changedAfterMove]
         if action == 1:
-            gridAfterMove = self.leftAddition(self.swipeLeft(copy.deepcopy(gridBeforeMove)))
+            gridAfterMove = self.leftAddition(self.swipeLeft(copy.deepcopy(gridBeforeMove)),True)
             changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
             return [gridAfterMove, changedAfterMove]
         if action == 2:
-            gridAfterMove = self.downAddition(self.swipeDown(copy.deepcopy(gridBeforeMove)))
+            gridAfterMove = self.downAddition(self.swipeDown(copy.deepcopy(gridBeforeMove)),True)
             changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
             return [gridAfterMove, changedAfterMove]
         if action == 3:
-            gridAfterMove = self.rightAddition(self.swipeRight(copy.deepcopy(gridBeforeMove)))
+            gridAfterMove = self.rightAddition(self.swipeRight(copy.deepcopy(gridBeforeMove)),True)
             changedAfterMove = self.changedAfterMove(gridBeforeMove, gridAfterMove)
             return [gridAfterMove, changedAfterMove]
 
@@ -309,7 +329,7 @@ class Board():
                 gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
                 # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS WHEN THERE IS NO EMPTY SPACES LEFT
 
-                if isEnd(gridAfterMove):
+                if self.isEnd(gridAfterMove):
                     return ("lose",gridAfterMove)
                 else:
                     return ("valid",gridAfterMove)
@@ -323,19 +343,20 @@ class Board():
         temp_grid_left = copy.deepcopy(gridAfterMove)
         temp_grid_right = copy.deepcopy(gridAfterMove)
 
-        up = self.upAddition(self.swipeUp(temp_grid_up))
-        down = self.downAddition(self.swipeDown(temp_grid_down))
-        left = self.leftAddition(self.swipeLeft(temp_grid_left))
-        right = self.rightAddition(self.swipeRight(temp_grid_right))
+        up = self.upAddition(self.swipeUp(temp_grid_up),True)
+        down = self.downAddition(self.swipeDown(temp_grid_down),True)
+        left = self.leftAddition(self.swipeLeft(temp_grid_left),True)
+        right = self.rightAddition(self.swipeRight(temp_grid_right),True)
         if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
-            return False
-        return True
+            return True
+        return False
 
     def gradientHeuristic(self,grid):
         if len(self.availableCells(grid)) == 0:
             if self.isEnd(grid):
                 return 0
-        gradients = [
+        """gradients = [
+
                     [[ 3,  2,  1,  0],
                      [ 2,  1,  0, -1],
                      [ 1,  0, -1, -2],
@@ -353,9 +374,19 @@ class Board():
                      [-1,  0,  1,  2],
                      [ 0,  1,  2,  3]]
                     ]
-        values = [0, 0, 0, 0]
-        for i in range(0,4):
-            for x in range(0,4):
-                for y in range(0,4):
-                    values[i] += gradients[i][x][y] * ( 2 ** grid[x][y] )
-        return max(values)
+        gradients = [[10,8,7,6.5],
+                    [.5,.7,1,3],
+                    [-.5,-1.5,-1.8,-2],
+                    [-3.8,-3.7,-3.5,-3]]"""
+
+        gradients = [[13.58,12.19,10.28,9.99],
+                    [9.98,8.88,7.67,7.24],
+                    [6.07,5.63,3.71,1.62],
+                    [1.25,0.99,0.58,0.34]]
+
+        values = 0
+        for x in range(0,4):
+            for y in range(0,4):
+                values += gradients[x][y] * ( 2 ** grid[x][y] )
+
+        return values + len(self.availableCells(grid))*25
