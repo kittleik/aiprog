@@ -308,25 +308,33 @@ class Board():
                 next_spot = available_spots[0]
                 gridAfterMove[next_spot[0]][next_spot[1]] = self.generatePiece()
                 # CHECK IF POSSIBLE TO MOVE IN THE DIFFERENT DIRECTIONS WHEN THERE IS NO EMPTY SPACES LEFT
-                temp_grid = copy.deepcopy(gridAfterMove)
-                temp_grid_up = copy.deepcopy(gridAfterMove)
-                temp_grid_down = copy.deepcopy(gridAfterMove)
-                temp_grid_left = copy.deepcopy(gridAfterMove)
-                temp_grid_right = copy.deepcopy(gridAfterMove)
 
-                up = self.upAddition(self.swipeUp(temp_grid_up))
-                down = self.downAddition(self.swipeDown(temp_grid_down))
-                left = self.leftAddition(self.swipeLeft(temp_grid_left))
-                right = self.rightAddition(self.swipeRight(temp_grid_right))
-                if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
+                if isEnd(gridAfterMove):
                     return ("lose",gridAfterMove)
                 else:
                     return ("valid",gridAfterMove)
 
         else:
             return ("valid",gridAfterMove)
+    def isEnd(self,gridAfterMove):
+        temp_grid = copy.deepcopy(gridAfterMove)
+        temp_grid_up = copy.deepcopy(gridAfterMove)
+        temp_grid_down = copy.deepcopy(gridAfterMove)
+        temp_grid_left = copy.deepcopy(gridAfterMove)
+        temp_grid_right = copy.deepcopy(gridAfterMove)
+
+        up = self.upAddition(self.swipeUp(temp_grid_up))
+        down = self.downAddition(self.swipeDown(temp_grid_down))
+        left = self.leftAddition(self.swipeLeft(temp_grid_left))
+        right = self.rightAddition(self.swipeRight(temp_grid_right))
+        if temp_grid == up and temp_grid == down and temp_grid == left and temp_grid == right:
+            return False
+        return True
 
     def gradientHeuristic(self,grid):
+        if len(self.availableCells(grid)) == 0:
+            if self.isEnd(grid):
+                return 0
         gradients = [
                     [[ 3,  2,  1,  0],
                      [ 2,  1,  0, -1],
