@@ -81,8 +81,6 @@ class Board():
                 if not explore:
                     self.points += 2 ** grid[i+1][j]
                 grid[i+3][j] = 0
-        if not explore:
-            print self.points
         return grid
 
 
@@ -133,8 +131,6 @@ class Board():
                 if not explore:
                     self.points += 2 ** grid[i+1][j]
                 grid[i][j] = 0
-        if not explore:
-            print self.points
         return grid
 
     def swipeLeft(self, grid):
@@ -184,8 +180,6 @@ class Board():
                 if not explore:
                     self.points += 2 ** grid[i][j+2]
                 grid[i][j+3] = 0
-        if not explore:
-            print self.points
         return grid
 
     def swipeRight(self, grid):
@@ -235,8 +229,6 @@ class Board():
                 if not explore:
                     self.points += 2 ** grid[i][j+1]
                 grid[i][j] = 0
-        if not explore:
-            print self.points
         return grid
 
     # todo, find a way to skip point update on every call of movement

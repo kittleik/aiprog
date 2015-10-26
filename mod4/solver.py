@@ -182,8 +182,8 @@ class Solver():
         #moveTodo = "up"
 
         while True:
-            #print "POINTS========> >  > " + str(self.board.points) + " <  < <========POINTS"
-            #print "BEST-TILE = | " + str(2 ** self.board.bestTile) + " |"
+            print "POINTS========> >  > " + str(self.board.points) + " <  < <========POINTS"
+            print "BEST-TILE = | " + str(2 ** self.board.bestTile) + " |"
 
             gridBeforeMove = copy.deepcopy(self.board.grid)
             self.doMove(moveTodo)
