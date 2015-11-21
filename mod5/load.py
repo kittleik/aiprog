@@ -4,6 +4,7 @@ import theano
 
 datasets_dir = "/home/havard/code/ai/aiprog/"
 
+
 def one_hot(x,n):
 	if type(x) == list:
 		x = np.array(x)
