@@ -2,7 +2,7 @@ import numpy as np
 import os
 import theano
 
-datasets_dir = "/Users/mrton/Dropbox/Development/Skole/AI-programmering/mod5/"
+datasets_dir = "/home/havard/code/ai/aiprog/"
 
 def one_hot(x,n):
 	if type(x) == list:
@@ -13,7 +13,7 @@ def one_hot(x,n):
 	return o_h
 
 def mnist(ntrain=60000,ntest=10000,onehot=True):
-	data_dir = os.path.join(datasets_dir,'basics')
+	data_dir = os.path.join(datasets_dir,'mod5')
 	fd = open(os.path.join(data_dir,'train-images.idx3-ubyte'))
 	loaded = np.fromfile(file=fd,dtype=np.uint8)
 	trX = loaded[16:].reshape((60000,28*28)).astype(float)
