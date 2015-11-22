@@ -3,7 +3,7 @@ from theano import tensor as T
 import numpy as np
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from load import mnist
-#import mnist_basics as mnist
+import mnist_basics as mnist_b
 
 srng = RandomStreams()
 
@@ -44,11 +44,11 @@ class ann:
 
 
     def blind_test(self,images):
-        btX = images/255.
-
-        predict = theano.function(inputs=[X], outputs=y_x, allow_input_downcast=True)
-
-        return
+        btX = self.floatX(images)
+        btX = btX/255.
+        res = self.predict(btX)
+        res = res.tolist()
+        return res
 
     # Helper
     def floatX(self, X):
@@ -78,24 +78,13 @@ class ann:
             updates.append((p, p - lr * g))
         return updates
 
-    # Drop out
-    def dropout(self, X, p=0.):
-        if p > 0:
-            retain_prob = 1 - p
-            X *= srng.binomial(X.shape, p=retain_prob, dtype=theano.config.floatX)
-            X /= retain_prob
-        return X
-
     # Artificial neural net model
     def model(self, X, w_h, w_h2, w_o, p_drop_input, p_drop_hidden):
 
-        #X = self.dropout(X, p_drop_input)
         h = self.rectify(T.dot(X, w_h))
 
-        #h = self.dropout(h, p_drop_hidden)
         h2 = self.rectify(T.dot(h, w_h2))
 
-        #h2 = self.dropout(h2, p_drop_hidden)
         py_x = self.softmax(T.dot(h2, w_o))
         return h, h2, py_x
 
@@ -103,42 +92,32 @@ class ann:
     def training(self, trX, trY):
         train = theano.function(inputs=[self.X, self.Y], outputs=cost, updates=updates, allow_input_downcast=True)
 
-    def run(self):
-        trX, teX, trY, teY = mnist(onehot=True)
+    def run(self, delta, epochs):
+        trX, trY = mnist_b.load_mnist()
+
+        trX = self.floatX(trX)
+        trX = trX/255.
+        trX = trX.reshape((60000,28*28)).astype(float)
+        trY = one_hot(trY, 10)
 
         print ("Starting...")
-        for i in range(20):
-            for start, end in zip(range(0, len(trX), 100), range(100, len(trX), 100)):
+        for i in range(epochs):
+            for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
                 self.cost = self.train(trX[start:end], trY[start:end])
 
-            #for x in range(len(trX)):
-            #    cost = train(trX[x],trY[x])
-            #cost = train(trX,trY)
             print ("epoch: " + str(i + 1))
-        print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
+        #print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
 
-'''
-class ann:
-
-
-import mnist_basics as mnist
-
-images, labels = mnist.load_mnist('testing', digits=[0,9])
-
-print (images[0])
-print (labels[0])
-'''
-
-#----------------------TRAINING DATA--------------------
+#--------------HELPER FUNCTION_---------___________________-
+def one_hot(x,n):
+	if type(x) == list:
+		x = np.array(x)
+	x = x.flatten()
+	o_h = np.zeros((len(x),n))
+	o_h[np.arange(len(x)),x] = 1
+	return o_h
 
 
-'''
-image = images[1111]
-label = labels[1111]
-
-print (label)
-mnist.show_digit_image(image,cm='gray')
-'''
-
-a = ann(listOfLayers=[100,100], learningRate=10, momentumRate=10, errorFunc=10)
+a = ann(listOfLayers=[625,625], learningRate=0.001, momentumRate=10, errorFunc=10)
 a.run()
+mnist_b.minor_demo(a)

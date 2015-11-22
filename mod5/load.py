@@ -32,7 +32,6 @@ def mnist(ntrain=60000,ntest=10000,onehot=True):
 	teY = loaded[8:].reshape((10000))
 
 
-
 	trX = trX/255.
 	teX = teX/255.
 
