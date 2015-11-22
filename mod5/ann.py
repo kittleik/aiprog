@@ -28,25 +28,12 @@ class ann:
                 break
             self.hidden_layers.append( self.init_weights( ( self.neuronsInHiddenLayers[i], self.neuronsInHiddenLayers[i+1] ) ) )
 
-        '''
-        self.w_h = self.init_weights((784, self.neuronsInHiddenLayers[0]))
-        self.hidden_layers.append(self.w_h)
-        self.w_h2 = self.init_weights((self.neuronsInHiddenLayers[0], self.neuronsInHiddenLayers[1]))
-        self.hidden_layers.append(self.w_h2)
-        self.w_o = self.init_weights((self.neuronsInHiddenLayers[1], 10))
-        self.hidden_layers.append(self.w_o)
-        '''
         #Forward propagation
-
-        #h, h2, py_x = self.model(self.X, self.hidden_layers)
         tunedWeights = self.model(self.X, self.hidden_layers)
-        #y_x = T.argmax(py_x, axis=1)
         y_x = T.argmax(tunedWeights[-1], axis=1)
 
         # Error sammenliknet med svaret
-        #self.cost = T.mean(T.nnet.categorical_crossentropy(py_x, self.Y))
         self.cost = T.mean(T.nnet.categorical_crossentropy(tunedWeights[-1], self.Y))
-        #params = [self.w_h, self.w_h2, self.w_o]
         params = self.hidden_layers
 
         # Backpropagation
@@ -69,6 +56,14 @@ class ann:
     # Helper
     def floatX(self, X):
         return np.asarray(X, dtype=theano.config.floatX)
+
+    def printSetUp(self):
+        setUp = []
+        for (f,b) in zip(self.neuronsInHiddenLayers, self.listOfFunctions):
+            setUp.append(f)
+            setUp.append(b)
+        print (setUp)
+
     # Initialize weight
     def init_weights(self, shape):
         return theano.shared(self.floatX(np.random.randn(*shape) * 0.01))
@@ -108,7 +103,6 @@ class ann:
 
     # Artificial neural net model
     def model(self, X, hidden_layers):
-
         ret = []
 
         for i in range(len(hidden_layers)):
@@ -116,34 +110,11 @@ class ann:
                 ret.append( self.runActivationFunction(X, hidden_layers[i], self.listOfFunctions[i]) )
             else:
                 ret.append( self.runActivationFunction(ret[i-1], hidden_layers[i], self.listOfFunctions[i]) )
-
-
-        '''
-        #Layer 1
-        h = self.runActivationFunction(X, hidden_layers[0], self.listOfFunctions[0])
-        ret.append(h)
-        #Layer 2
-        h2 = self.runActivationFunction(h, hidden_layers[1], self.listOfFunctions[1])
-        ret.append(h2)
-        #Output layer
-        py_x = self.runActivationFunction(h2, hidden_layers[2], self.listOfFunctions[2])
-        ret.append(py_x)
-        #return h, h2, py_x
-        '''
         return ret
 
 
     def training(self, trX, trY):
         train = theano.function(inputs=[self.X, self.Y], outputs=cost, updates=updates, allow_input_downcast=True)
-    def printSetUp(self):
-        setUp = []
-        for (f,b) in zip(self.neuronsInHiddenLayers, self.listOfFunctions):
-            setUp.append(f)
-            setUp.append(b)
-        print (setUp)
-
-
-
 
 
     def run(self, delta, epochs):
@@ -163,7 +134,7 @@ class ann:
             print ("epoch: " + str(i + 1))
         #print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
 
-#--------------HELPER FUNCTION_-----------------------------
+#--------------HELPER FUNCTION------------------------------
 def one_hot(x,n):
 	if type(x) == list:
 		x = np.array(x)
@@ -171,7 +142,6 @@ def one_hot(x,n):
 	o_h = np.zeros((len(x),n))
 	o_h[np.arange(len(x)),x] = 1
 	return o_h
-
 
 a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
 a.run(delta=100,epochs=5)
