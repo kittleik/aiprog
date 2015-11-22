@@ -2,7 +2,8 @@ import numpy as np
 import os
 import theano
 
-datasets_dir = "/Users/mrton/Dropbox/Development/Skole/aiprog/"
+datasets_dir = "/home/havard/code/ai/aiprog/"
+
 
 def one_hot(x,n):
 	if type(x) == list:
