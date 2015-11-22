@@ -4,14 +4,16 @@ import numpy as np
 from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from load import mnist
 import mnist_basics as mnist_b
+import copy
 
 srng = RandomStreams()
 
 
 class ann:
-    def __init__ (self, listOfLayers, learningRate, momentumRate, errorFunc):
-        self.listOfLayers = listOfLayers
-        self.numOfLayers = len(listOfLayers)
+    def __init__ (self, neuronsInHiddenLayers, listOfFunctions, learningRate, momentumRate, errorFunc):
+        self.neuronsInHiddenLayers = neuronsInHiddenLayers
+        self.listOfFunctions = listOfFunctions
+        self.numOfHiddenLayers = len(neuronsInHiddenLayers)
         self.learningRate = learningRate
         self.momentumRate = momentumRate
         self.errorFunc = errorFunc
@@ -19,19 +21,33 @@ class ann:
         # input, output
         self.X = T.fmatrix()
         self.Y = T.fmatrix()
-
         #Layers
-        self.w_h = self.init_weights((784, self.listOfLayers[0]))
-        self.w_h2 = self.init_weights((self.listOfLayers[0], self.listOfLayers[1]))
-        self.w_o = self.init_weights((self.listOfLayers[1], 10))
+        self.hidden_layers = []
+        for i in range(len(neuronsInHiddenLayers)):
+            if i == (len(neuronsInHiddenLayers) - 1):
+                break
+            self.hidden_layers.append( self.init_weights( ( self.neuronsInHiddenLayers[i], self.neuronsInHiddenLayers[i+1] ) ) )
 
+        '''
+        self.w_h = self.init_weights((784, self.neuronsInHiddenLayers[0]))
+        self.hidden_layers.append(self.w_h)
+        self.w_h2 = self.init_weights((self.neuronsInHiddenLayers[0], self.neuronsInHiddenLayers[1]))
+        self.hidden_layers.append(self.w_h2)
+        self.w_o = self.init_weights((self.neuronsInHiddenLayers[1], 10))
+        self.hidden_layers.append(self.w_o)
+        '''
         #Forward propagation
-        h, h2, py_x = self.model(self.X, self.w_h, self.w_h2, self.w_o, 0., 0.)
-        y_x = T.argmax(py_x, axis=1)
+
+        #h, h2, py_x = self.model(self.X, self.hidden_layers)
+        tunedWeights = self.model(self.X, self.hidden_layers)
+        #y_x = T.argmax(py_x, axis=1)
+        y_x = T.argmax(tunedWeights[-1], axis=1)
 
         # Error sammenliknet med svaret
-        self.cost = T.mean(T.nnet.categorical_crossentropy(py_x, self.Y))
-        params = [self.w_h, self.w_h2, self.w_o]
+        #self.cost = T.mean(T.nnet.categorical_crossentropy(py_x, self.Y))
+        self.cost = T.mean(T.nnet.categorical_crossentropy(tunedWeights[-1], self.Y))
+        #params = [self.w_h, self.w_h2, self.w_o]
+        params = self.hidden_layers
 
         # Backpropagation
         updates = self.RMSprop(self.cost, params, lr=0.001)
@@ -65,6 +81,9 @@ class ann:
         e_x = T.exp(X - X.max(axis=1).dimshuffle(0, 'x'))
         return e_x / e_x.sum(axis=1).dimshuffle(0, 'x')
 
+    def sigmoid(self,X):
+        return T.nnet.sigmoid(X)
+
     # Backpropagation
     def RMSprop(self, cost, params, lr=0.001, rho=0.9, epsilon=1e-6):
         grads = T.grad(cost=cost, wrt=params)
@@ -78,19 +97,54 @@ class ann:
             updates.append((p, p - lr * g))
         return updates
 
+    def runActivationFunction(self, X, w, activation_function):
+        if activation_function == "sigmoid":
+            h = self.sigmoid(T.dot(X, w))
+        elif activation_function == "rectify":
+            h = self.rectify(T.dot(X, w))
+        elif activation_function == "softmax":
+            h = self.softmax(T.dot(X, w))
+        return h
+
     # Artificial neural net model
-    def model(self, X, w_h, w_h2, w_o, p_drop_input, p_drop_hidden):
+    def model(self, X, hidden_layers):
 
-        h = self.rectify(T.dot(X, w_h))
+        ret = []
 
-        h2 = self.rectify(T.dot(h, w_h2))
+        for i in range(len(hidden_layers)):
+            if i == 0:
+                ret.append( self.runActivationFunction(X, hidden_layers[i], self.listOfFunctions[i]) )
+            else:
+                ret.append( self.runActivationFunction(ret[i-1], hidden_layers[i], self.listOfFunctions[i]) )
 
-        py_x = self.softmax(T.dot(h2, w_o))
-        return h, h2, py_x
+
+        '''
+        #Layer 1
+        h = self.runActivationFunction(X, hidden_layers[0], self.listOfFunctions[0])
+        ret.append(h)
+        #Layer 2
+        h2 = self.runActivationFunction(h, hidden_layers[1], self.listOfFunctions[1])
+        ret.append(h2)
+        #Output layer
+        py_x = self.runActivationFunction(h2, hidden_layers[2], self.listOfFunctions[2])
+        ret.append(py_x)
+        #return h, h2, py_x
+        '''
+        return ret
 
 
     def training(self, trX, trY):
         train = theano.function(inputs=[self.X, self.Y], outputs=cost, updates=updates, allow_input_downcast=True)
+    def printSetUp(self):
+        setUp = []
+        for (f,b) in zip(self.neuronsInHiddenLayers, self.listOfFunctions):
+            setUp.append(f)
+            setUp.append(b)
+        print (setUp)
+
+
+
+
 
     def run(self, delta, epochs):
         trX, trY = mnist_b.load_mnist()
@@ -101,6 +155,7 @@ class ann:
         trY = one_hot(trY, 10)
 
         print ("Starting...")
+        self.printSetUp()
         for i in range(epochs):
             for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
                 self.cost = self.train(trX[start:end], trY[start:end])
@@ -108,7 +163,7 @@ class ann:
             print ("epoch: " + str(i + 1))
         #print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
 
-#--------------HELPER FUNCTION_---------___________________-
+#--------------HELPER FUNCTION_-----------------------------
 def one_hot(x,n):
 	if type(x) == list:
 		x = np.array(x)
@@ -118,6 +173,6 @@ def one_hot(x,n):
 	return o_h
 
 
-a = ann(listOfLayers=[500,500], learningRate=0.001, momentumRate=10, errorFunc=10)
-a.run(1000,10)
+a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
+a.run(delta=100,epochs=5)
 mnist_b.minor_demo(a)
