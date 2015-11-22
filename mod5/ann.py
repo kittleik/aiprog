@@ -118,6 +118,6 @@ def one_hot(x,n):
 	return o_h
 
 
-a = ann(listOfLayers=[625,625], learningRate=0.001, momentumRate=10, errorFunc=10)
-a.run()
+a = ann(listOfLayers=[500,500], learningRate=0.001, momentumRate=10, errorFunc=10)
+a.run(1000,10)
 mnist_b.minor_demo(a)
