@@ -207,9 +207,3 @@ def minor_demo(ann,ignore=0):
     print('Demo 100 set: \n ',test_it(ann,demo100,8))
 
 # Helper methods
-
-def convertToListWithFeatureLabel(features, labels):
-    listOfPairs = []
-    for i in range(len(features)):
-        listOfPairs.append([features[i],labels[i]])
-    return listOfPairs
