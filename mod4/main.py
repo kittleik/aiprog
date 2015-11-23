@@ -9,8 +9,13 @@ window = GameWindow(root)
 board = Board()
 window.update_view( board.generateState(board.grid) )
 solver = Solver(board, window, root)
+solver.startSolver("random")
+'''for i in range(1,50):
+    board = Board()
+    window.update_view( board.generateState(board.grid) )
+    solver = Solver(board, window, root, train_nr=i)
 #modes: random, upleftdownright, partialAI, onestepahead
-solver.startSolver("expectimax")
+    solver.startSolver("expectimax")'''
 
 # TO PLAY THE GAME, UMCOMMENT THESE LINES
 '''

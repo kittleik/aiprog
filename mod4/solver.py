@@ -1,11 +1,13 @@
-import copy, time, random
+import copy, time, random, pickle
 from operator import itemgetter
 
 class Solver():
-    def __init__(self,board,gui,root):
+    def __init__(self,board,gui,root,train_nr=0):
         self.root = root
         self.board = board
         self.gui = gui
+        self.file = 'training/train_data_'+str(train_nr)
+        self.train_data = []
 
 
     def expectimax(self, grid, depth, agentIndex):
@@ -116,22 +118,33 @@ class Solver():
     def doMove(self, move):
         if move == "up":
             print "up"
+            self.train_data += self.board.generateState(self.board.grid)
+            self.train_data.append(0)
             self.board.upAddition(self.board.swipeUp(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
 
         if move == "down":
             print "down"
+
+            self.train_data += self.board.generateState(self.board.grid)
+            self.train_data.append(1)
             self.board.downAddition(self.board.swipeDown(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "left":
             print "left"
+
+            self.train_data += self.board.generateState(self.board.grid)
+            self.train_data.append(2)
             self.board.leftAddition(self.board.swipeLeft(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "right":
             print "right"
+
+            self.train_data += self.board.generateState(self.board.grid)
+            self.train_data.append(3)
             self.board.rightAddition(self.board.swipeRight(self.board.grid),False)
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
@@ -163,11 +176,11 @@ class Solver():
             return self.lookOneStepAhead(self.board.grid)[1]
         elif mode == "expectimax":
             if len(self.board.availableCells(self.board.grid)) < 2:
-                depth = 5
+                depth = 6
             elif len(self.board.availableCells(self.board.grid)) > 2 and len(self.board.availableCells(self.board.grid)) <= 4:
-                depth = 4
+                depth = 5
             elif len(self.board.availableCells(self.board.grid)) > 4 and len(self.board.availableCells(self.board.grid)) <= 7:
-                depth = 3
+                depth = 4
             else:
                 depth = 3
             return self.converNumberToDirection(self.expectimax(self.board.grid, depth, 0)[1])
@@ -203,7 +216,9 @@ class Solver():
                 self.gui.update_view(self.board.generateState(self.board.grid))
 
             moveTodo = self.nextMove(mode,moveTodo)
-
+        asd = open(self.file, 'w+')
+        pickle.dump(self.train_data, asd)
+        asd.close()
         if self.board.bestTile >= 2048:
             print "Your best tile is: " + str(int(2 ** self.board.bestTile))
             print "Congratulations!! You scored ", str(self.board.points), "points"
