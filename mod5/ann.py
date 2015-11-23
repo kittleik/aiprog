@@ -144,5 +144,5 @@ def one_hot(x,n):
 	return o_h
 
 a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
-a.run(delta=100,epochs=5)
+a.run(delta=100,epochs=10)
 mnist_b.minor_demo(a)
