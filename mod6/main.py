@@ -6,6 +6,8 @@ from ann import Ann
 import numpy as np
 import theano
 import get_data
+from solver import Solver
+from welch import welch
 
 def doMove(move):
     if move == 0 or move == "w":
@@ -76,16 +78,28 @@ for i in range (50):
     trX, trY = get_data.get_training_data('training/train_data_'+str(i+1))
     a.training(trX, trY,40,1)
 
-l=[]
+random_res = []
+for i in range(50):
+    board = Board()
+    window.update_view( board.generateState(board.grid) )
+    solver = Solver(board, window, root)
+    solver.startSolver("random")
+    random_res.append(int(2**board.bestTile))
+
+print random_res
+
+ann_res=[]
 
 for asd in range(50):
     board = Board()
     window.update_view( board.generateState(board.grid) )
     x = play(a)
-    l.append(x)
+    ann_res.append(x)
 
-print l
+print ann_res
 #trX, trY = get_data.get_training_data('train_data_1')
+
+welch(random_res,ann_res)
 
 
 root.mainloop()
