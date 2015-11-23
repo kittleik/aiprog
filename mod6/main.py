@@ -64,6 +64,7 @@ def play(ann):
         print "YOU DIED"
         print "Your best tile is: " + str(int(2 ** board.bestTile))
         print "You scored ", str(board.points), "points"
+    return int(2 ** board.bestTile)
 
 root = Tk()
 window = GameWindow(root)
@@ -73,11 +74,17 @@ a = Ann(neuronsInHiddenLayers=[16,500,500,4], listOfFunctions=["rectify","rectif
 for i in range (50):
     print "Training data "+str(i+1)
     trX, trY = get_data.get_training_data('training/train_data_'+str(i+1))
-    a.training(trX, trY,100,10)
+    a.training(trX, trY,40,1)
+
+l=[]
+
+for asd in range(50):
     board = Board()
     window.update_view( board.generateState(board.grid) )
-    play(a)
+    x = play(a)
+    l.append(x)
 
+print l
 #trX, trY = get_data.get_training_data('train_data_1')
 
 

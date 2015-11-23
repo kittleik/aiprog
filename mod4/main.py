@@ -5,11 +5,18 @@ from Tkinter import *
 import random, sys, copy, time
 
 root = Tk()
+
 window = GameWindow(root)
-board = Board()
-window.update_view( board.generateState(board.grid) )
-solver = Solver(board, window, root)
-solver.startSolver("random")
+
+random_res = []
+for i in range(50):
+    board = Board()
+    window.update_view( board.generateState(board.grid) )
+    solver = Solver(board, window, root)
+    solver.startSolver("random")
+    random_res.append(int(2**board.bestTile))
+
+print random_res
 '''for i in range(1,50):
     board = Board()
     window.update_view( board.generateState(board.grid) )
