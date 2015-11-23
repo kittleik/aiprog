@@ -69,8 +69,7 @@ root = Tk()
 window = GameWindow(root)
 
 
-
-a = Ann(listOfLayers=[50,50], learningRate=0.001, momentumRate=10, errorFunc=10)
+a = Ann(neuronsInHiddenLayers=[16,500,500,4], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
 for i in range (50):
     print "Training data "+str(i+1)
     trX, trY = get_data.get_training_data('training/train_data_'+str(i+1))

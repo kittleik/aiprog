@@ -6,11 +6,11 @@ import get_data
 
 srng = RandomStreams()
 
-
 class Ann:
-    def __init__ (self, listOfLayers, learningRate, momentumRate, errorFunc):
-        self.listOfLayers = listOfLayers
-        self.numOfLayers = len(listOfLayers)
+    def __init__ (self, neuronsInHiddenLayers, listOfFunctions, learningRate, momentumRate, errorFunc):
+        self.neuronsInHiddenLayers = neuronsInHiddenLayers
+        self.listOfFunctions = listOfFunctions
+        self.numOfHiddenLayers = len(neuronsInHiddenLayers)
         self.learningRate = learningRate
         self.momentumRate = momentumRate
         self.errorFunc = errorFunc
@@ -18,19 +18,20 @@ class Ann:
         # input, output
         self.X = T.fmatrix()
         self.Y = T.fmatrix()
-
         #Layers
-        self.w_h = self.init_weights((16, self.listOfLayers[0]))
-        self.w_h2 = self.init_weights((self.listOfLayers[0], self.listOfLayers[1]))
-        self.w_o = self.init_weights((self.listOfLayers[1], 4))
+        self.hidden_layers = []
+        for i in range(len(neuronsInHiddenLayers)):
+            if i == (len(neuronsInHiddenLayers) - 1):
+                break
+            self.hidden_layers.append( self.init_weights( ( self.neuronsInHiddenLayers[i], self.neuronsInHiddenLayers[i+1] ) ) )
 
         #Forward propagation
-        h, h2, py_x = self.model(self.X, self.w_h, self.w_h2, self.w_o, 0., 0.)
-        y_x = T.argmax(py_x, axis=1)
+        tunedWeights = self.model(self.X, self.hidden_layers)
+        y_x = T.argmax(tunedWeights[-1], axis=1)
 
         # Error sammenliknet med svaret
-        self.cost = T.mean(T.nnet.categorical_crossentropy(py_x, self.Y))
-        params = [self.w_h, self.w_h2, self.w_o]
+        self.cost = T.mean(T.nnet.categorical_crossentropy(tunedWeights[-1], self.Y))
+        params = self.hidden_layers
 
         # Backpropagation
         updates = self.RMSprop(self.cost, params, lr=0.001)
@@ -39,7 +40,7 @@ class Ann:
         self.train = theano.function(inputs=[self.X, self.Y], outputs=self.cost, updates=updates, allow_input_downcast=True)
 
         # Prediction function
-        self.predict = theano.function(inputs=[self.X], outputs=py_x, allow_input_downcast=True)
+        self.predict = theano.function(inputs=[self.X], outputs=tunedWeights[-1], allow_input_downcast=True)
 
 
     def blind_test(self,images):
@@ -52,6 +53,14 @@ class Ann:
     # Helper
     def floatX(self, X):
         return np.asarray(X, dtype=theano.config.floatX)
+
+    def printSetUp(self):
+        setUp = []
+        for (f,b) in zip(self.neuronsInHiddenLayers, self.listOfFunctions):
+            setUp.append(f)
+            setUp.append(b)
+        print (setUp)
+
     # Initialize weight
     def init_weights(self, shape):
         return theano.shared(self.floatX(np.random.randn(*shape) * 0.01))
@@ -63,6 +72,9 @@ class Ann:
     def softmax(self, X):
         e_x = T.exp(X - X.max(axis=1).dimshuffle(0, 'x'))
         return e_x / e_x.sum(axis=1).dimshuffle(0, 'x')
+
+    def sigmoid(self,X):
+        return T.nnet.sigmoid(X)
 
     # Backpropagation
     def RMSprop(self, cost, params, lr=0.001, rho=0.9, epsilon=1e-6):
@@ -77,15 +89,41 @@ class Ann:
             updates.append((p, p - lr * g))
         return updates
 
+    def runActivationFunction(self, X, w, activation_function):
+        if activation_function == "sigmoid":
+            h = self.sigmoid(T.dot(X, w))
+        elif activation_function == "rectify":
+            h = self.rectify(T.dot(X, w))
+        elif activation_function == "softmax":
+            h = self.softmax(T.dot(X, w))
+        return h
+
     # Artificial neural net model
-    def model(self, X, w_h, w_h2, w_o, p_drop_input, p_drop_hidden):
+    def model(self, X, hidden_layers):
+        ret = []
 
-        h = self.rectify(T.dot(X, w_h))
+        for i in range(len(hidden_layers)):
+            if i == 0:
+                ret.append( self.runActivationFunction(X, hidden_layers[i], self.listOfFunctions[i]) )
+            else:
+                ret.append( self.runActivationFunction(ret[i-1], hidden_layers[i], self.listOfFunctions[i]) )
+        return ret
 
-        h2 = self.rectify(T.dot(h, w_h2))
+    def run(self, delta, epochs):
+        trX, trY = get_data.get_training_data('training/train_data_1')
 
-        py_x = self.softmax(T.dot(h2, w_o))
-        return h, h2, py_x
+        trX = self.floatX(trX)
+        trX = trX/255.
+        trX = trX.reshape((60000,28*28)).astype(float)
+        trY = one_hot(trY, 10)
+
+        print ("Starting...")
+        self.printSetUp()
+        for i in range(epochs):
+            for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
+                self.cost = self.train(trX[start:end], trY[start:end])
+
+            print ("epoch: " + str(i + 1))
 
     def training(self,trX,trY, delta, epochs):
 
