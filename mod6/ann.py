@@ -34,7 +34,7 @@ class Ann:
         params = self.hidden_layers
 
         # Backpropagation
-        updates = self.RMSprop(self.cost, params, lr=0.001)
+        updates = self.RMSprop(self.cost, params, lr=self.learningRate, rho=self.momentumRate)
 
         # Training function
         self.train = theano.function(inputs=[self.X, self.Y], outputs=self.cost, updates=updates, allow_input_downcast=True)

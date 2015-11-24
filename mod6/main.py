@@ -77,12 +77,12 @@ window = GameWindow(root)
 EPOCHS_PER_GAME             = 10
 NEURONS_IN_HIDDEN_LAYERS    = [17,500,500,4]
 LIST_OF_FUNCTIONS           = ["rectify","rectify","softmax"]
+LEARNING_RATE               = 0.003
+MOMENTUM_RATE               = 0.9
 
-a = Ann(neuronsInHiddenLayers=NEURONS_IN_HIDDEN_LAYERS, listOfFunctions=LIST_OF_FUNCTIONS, learningRate=0.001, momentumRate=10, errorFunc=10)
+a = Ann(neuronsInHiddenLayers=NEURONS_IN_HIDDEN_LAYERS, listOfFunctions=LIST_OF_FUNCTIONS, learningRate=LEARNING_RATE, momentumRate=MOMENTUM_RATE, errorFunc=10)
 for i in range (50):
-    print "Loading training data "+str(i+1)
     trX, trY = get_data.get_training_data('training/train_data_'+str(i+1))
-    print len(trX)
     print "Training on data "+str(i+1)
     a.training(trX, trY,len(trX)-1,EPOCHS_PER_GAME)
 
