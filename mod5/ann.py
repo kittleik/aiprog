@@ -5,9 +5,7 @@ from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
 from load import mnist
 import mnist_basics as mnist_b
 import copy
-
-srng = RandomStreams()
-
+import matplotlib.pyplot as plt
 
 class ann:
     def __init__ (self, neuronsInHiddenLayers, listOfFunctions, learningRate, momentumRate, errorFunc):
@@ -76,8 +74,14 @@ class ann:
         e_x = T.exp(X - X.max(axis=1).dimshuffle(0, 'x'))
         return e_x / e_x.sum(axis=1).dimshuffle(0, 'x')
 
-    def sigmoid(self,X):
+    def sigmoid(self, X):
         return T.nnet.sigmoid(X)
+
+    def arctan(self, X):
+        return T.arctan(X)
+
+    def tanh(self, X):
+        return T.tanh(X)
 
     # Backpropagation
     def RMSprop(self, cost, params, lr=0.001, rho=0.9, epsilon=1e-6):
@@ -99,6 +103,10 @@ class ann:
             h = self.rectify(T.dot(X, w))
         elif activation_function == "softmax":
             h = self.softmax(T.dot(X, w))
+        elif activation_function == "arctan":
+            h = self.arctan(T.dot(X, w))
+        elif activation_function == "tanh":
+            h = self.tanh(T.dot(X, w))
         return h
 
     # Artificial neural net model
@@ -119,20 +127,34 @@ class ann:
 
     def run(self, delta, epochs):
         trX, trY = mnist_b.load_mnist()
-
         trX = self.floatX(trX)
         trX = trX/255.
         trX = trX.reshape((60000,28*28)).astype(float)
         trY = one_hot(trY, 10)
 
+        teX, teY = mnist_b.load_mnist("testing")
+        teX = self.floatX(teX)
+        teX = teX/255.
+        teX = teX.reshape((10000,28*28)).astype(float)
+        teY = one_hot(teY, 10)
+
+        result_list = [self.neuronsInHiddenLayers, self.listOfFunctions, delta, epochs,[]]
         print ("Starting...")
         self.printSetUp()
         for i in range(epochs):
             for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
                 self.cost = self.train(trX[start:end], trY[start:end])
 
+            predicted = np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100
+            result_list[4].append(predicted)
             print ("epoch: " + str(i + 1))
-        #print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
+            print ("Epoch number " + str(i + 1) + " predicted : " + str(predicted) + str(" % correct"))
+
+        print (result_list)
+        plt.plot(result_list[4])
+        plt.ylabel('correctness rate')
+        plt.xlabel('epochs')
+        plt.show()
 
 #--------------HELPER FUNCTION------------------------------
 def one_hot(x,n):
@@ -143,6 +165,11 @@ def one_hot(x,n):
 	o_h[np.arange(len(x)),x] = 1
 	return o_h
 
+#a = ann(neuronsInHiddenLayers=[784,10,10], listOfFunctions=["rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
 a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
-a.run(delta=100,epochs=10)
+#a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","sigmoid"], learningRate=0.001, momentumRate=10, errorFunc=10)
+#a = ann(neuronsInHiddenLayers=[784,10,10,10,10], listOfFunctions=["rectify","rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
+
+
+a.run(delta=100,epochs=50)
 mnist_b.minor_demo(a)
