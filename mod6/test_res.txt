@@ -196,3 +196,12 @@ P-value: 0.0000000018
 Number of demo points: 7/7
 
 -----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 105.6
+Average ANN tile: 230
+P-value: 0.0000000001
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------

@@ -118,6 +118,6 @@ f.write(welch(random_res,ann_res))
 f.write('\n')
 f.write('-----------------------------------------------------------------------\n')
 f.close()
-print random_res
+print welch(random_res,ann_res)
 
 root.mainloop()
