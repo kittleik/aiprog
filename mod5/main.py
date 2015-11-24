@@ -1,4 +1,4 @@
-import ann
+from ann import ann
 import mnist_basics as mnist
 
 
