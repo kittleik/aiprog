@@ -106,6 +106,8 @@ for asd in range(50):
     window.update_view( board.generateState(board.grid) )
     x = play(a)
     ann_res.append(x)
+
+'''
 epo_str = "Epochs per game: " + str(EPOCHS_PER_GAME)+"\n"
 nu_num_str = "Number of neurons: " + str(NEURONS_IN_HIDDEN_LAYERS)+"\n"
 l_func_str = "List of fuctions: " + str(LIST_OF_FUNCTIONS)+"\n"
@@ -118,6 +120,7 @@ f.write(welch(random_res,ann_res))
 f.write('\n')
 f.write('-----------------------------------------------------------------------\n')
 f.close()
+'''
 print welch(random_res,ann_res)
 
 root.mainloop()
