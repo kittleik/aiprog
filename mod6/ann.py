@@ -42,14 +42,6 @@ class Ann:
         # Prediction function
         self.predict = theano.function(inputs=[self.X], outputs=tunedWeights[-1], allow_input_downcast=True)
 
-
-    def blind_test(self,images):
-        btX = self.floatX(images)
-        btX = btX/255.
-        res = self.predict(btX)
-        res = res.tolist()
-        return res
-
     # Helper
     def floatX(self, X):
         return np.asarray(X, dtype=theano.config.floatX)
@@ -109,28 +101,10 @@ class Ann:
                 ret.append( self.runActivationFunction(ret[i-1], hidden_layers[i], self.listOfFunctions[i]) )
         return ret
 
-    def run(self, delta, epochs):
-        trX, trY = get_data.get_training_data('training/train_data_1')
-
-        trX = self.floatX(trX)
-        trX = trX/255.
-        trX = trX.reshape((60000,28*28)).astype(float)
-        trY = one_hot(trY, 10)
-
-        print ("Starting...")
-        self.printSetUp()
-        for i in range(epochs):
-            for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
-                self.cost = self.train(trX[start:end], trY[start:end])
-
-            print ("epoch: " + str(i + 1))
-
     def training(self,trX,trY, delta, epochs):
 
-        print ("Training...")
         for i in range(epochs):
             for start, end in zip(range(0, len(trX), delta), range(delta, len(trX), delta)):
                 self.cost = self.train(trX[start:end], trY[start:end])
 
-            print ("epoch: " + str(i + 1))
         #print ("Epoch number " + str(i + 1) + " predicted : " + str(np.mean(np.argmax(teY, axis=1) == self.predict(teX)) * 100) + str(" % correct"))
