@@ -212,10 +212,5 @@ class Solver():
         asd = open(self.file, 'w+')
         pickle.dump(self.train_data, asd)
         asd.close()
-        if self.board.bestTile >= 2048:
-            print "Your best tile is: " + str(int(2 ** self.board.bestTile))
-            print "Congratulations!! You scored ", str(self.board.points), "points"
-        else:
-            print "YOU DIED"
-            print "Your best tile is: " + str(int(2 ** self.board.bestTile))
-            print "You scored ", str(self.board.points), "points"
+
+        print "Your best tile is: " + str(int(2 ** self.board.bestTile))
