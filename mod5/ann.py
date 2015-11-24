@@ -164,12 +164,3 @@ def one_hot(x,n):
 	o_h = np.zeros((len(x),n))
 	o_h[np.arange(len(x)),x] = 1
 	return o_h
-
-#a = ann(neuronsInHiddenLayers=[784,10,10], listOfFunctions=["rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
-a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
-#a = ann(neuronsInHiddenLayers=[784,500,500,10], listOfFunctions=["rectify","rectify","sigmoid"], learningRate=0.001, momentumRate=10, errorFunc=10)
-#a = ann(neuronsInHiddenLayers=[784,10,10,10,10], listOfFunctions=["rectify","rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
-
-
-a.run(delta=100,epochs=50)
-mnist_b.minor_demo(a)
