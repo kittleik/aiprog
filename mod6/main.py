@@ -10,35 +10,43 @@ from solver import Solver
 from welch import welch
 
 def doMove(move):
-    if move == 0 or move == "w":
+    if move == 0:
         board.upAddition(board.swipeUp(board.grid),False)
         window.update_view( board.generateState(board.grid) )
 
-    elif move == 2 or move == "a":
+    elif move == 2:
         board.leftAddition(board.swipeLeft(board.grid),False)
         window.update_view( board.generateState(board.grid) )
 
-    elif move == 1 or move == "s":
+    elif move == 1:
         board.downAddition(board.swipeDown(board.grid),False)
         window.update_view( board.generateState(board.grid) )
 
-    elif move == 3 or move == "d":
+    elif move == 3:
         board.rightAddition(board.swipeRight(board.grid),False)
         window.update_view( board.generateState(board.grid) )
 
 def play(ann):
     while True:
         window.update_view( board.generateState(board.grid) )
-        print "POINTS========> >  > " + str(board.points) + " <  < <========POINTS"
-        print "BEST-TILE = | " + str(2 ** board.bestTile) + " |"
         gridBeforeMove = copy.deepcopy(board.grid)
-        pred_in = np.asarray(board.generateState(gridBeforeMove), dtype=theano.config.floatX)
-        pred_in = pred_in/13.
+        #pred_in with empty
+
+        pred_in = board.generateState(gridBeforeMove)
+        pred_in.append(pred_in.count(0))
+        pred_in = np.asarray(pred_in, dtype=theano.config.floatX)
+        pred_in[:-1] = pred_in[:-1]/max(pred_in[:-1])
+        pred_in[-1] = pred_in[-1]/16.
+        '''
+        #normal pred_in
+        pred_in = board.generateState(gridBeforeMove)
+        pred_in = np.asarray(pred_in, dtype=theano.config.floatX)
+        pred_in = pred_in/max(pred_in)
+        '''
         movement_choice = ann.predict([pred_in])
         movement_choice = movement_choice.flatten().tolist()
-        print movement_choice
+
         movement_choice = sorted(range(len(movement_choice)), key=lambda k: movement_choice[k])[::-1]
-        print movement_choice
 
         for move in movement_choice:
             doMove(move)
@@ -59,47 +67,57 @@ def play(ann):
 
     window.update_view( board.generateState(board.grid) )
     #Feedback about how the game went
-    if board.bestTile >= 2048:
-        print "Your best tile is: " + str(int(2 ** board.bestTile))
-        print "Congratulations!! You scored ", str(board.points), "points"
-    else:
-        print "YOU DIED"
-        print "Your best tile is: " + str(int(2 ** board.bestTile))
-        print "You scored ", str(board.points), "points"
+
+    print "Your best tile is: " + str(int(2 ** board.bestTile))
     return int(2 ** board.bestTile)
 
 root = Tk()
 window = GameWindow(root)
 
+EPOCHS_PER_GAME             = 10
+NEURONS_IN_HIDDEN_LAYERS    = [17,500,500,4]
+LIST_OF_FUNCTIONS           = ["rectify","rectify","softmax"]
 
-a = Ann(neuronsInHiddenLayers=[16,500,500,4], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
+a = Ann(neuronsInHiddenLayers=NEURONS_IN_HIDDEN_LAYERS, listOfFunctions=LIST_OF_FUNCTIONS, learningRate=0.001, momentumRate=10, errorFunc=10)
 for i in range (50):
-    print "Training data "+str(i+1)
+    print "Loading training data "+str(i+1)
     trX, trY = get_data.get_training_data('training/train_data_'+str(i+1))
-    a.training(trX, trY,40,1)
+    print len(trX)
+    print "Training on data "+str(i+1)
+    a.training(trX, trY,len(trX)-1,EPOCHS_PER_GAME)
 
 random_res = []
+#random_res = [128, 128, 256, 64, 256, 128, 64, 64, 32, 64, 128, 128, 128, 128, 128, 128, 64, 128, 64, 128, 128, 64, 64, 64, 64, 128, 128, 128, 64, 128, 128, 128, 128, 128, 128, 128, 32, 128, 256, 64, 64, 128, 64, 64, 64, 128, 128, 64, 128, 64]
+
 for i in range(50):
+    print "Random game: "+str(i+1)
     board = Board()
     window.update_view( board.generateState(board.grid) )
     solver = Solver(board, window, root)
     solver.startSolver("random")
     random_res.append(int(2**board.bestTile))
 
-print random_res
 
 ann_res=[]
 
 for asd in range(50):
+    print "ANN game: "+str(asd+1)
     board = Board()
     window.update_view( board.generateState(board.grid) )
     x = play(a)
     ann_res.append(x)
+epo_str = "Epochs per game: " + str(EPOCHS_PER_GAME)+"\n"
+nu_num_str = "Number of neurons: " + str(NEURONS_IN_HIDDEN_LAYERS)+"\n"
+l_func_str = "List of fuctions: " + str(LIST_OF_FUNCTIONS)+"\n"
 
-print ann_res
-#trX, trY = get_data.get_training_data('train_data_1')
-
-welch(random_res,ann_res)
-
+f = open('test_res.txt','a')
+f.write(epo_str)
+f.write(nu_num_str)
+f.write(l_func_str)
+f.write(welch(random_res,ann_res))
+f.write('\n')
+f.write('-----------------------------------------------------------------------\n')
+f.close()
+print random_res
 
 root.mainloop()

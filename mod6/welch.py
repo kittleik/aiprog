@@ -10,7 +10,5 @@ def welch(list1, list2):
     resp = requests.post('http://folk.ntnu.no/valerijf/6/', data=params)
     return resp.text
 
-print welch(lr,la)
-
 #a = Ann(neuronsInHiddenLayers=[16,250,200,4], listOfFunctions=["rectify","rectify","softmax"], learningRate=0.001, momentumRate=10, errorFunc=10)
 #a.training(trX, trY,20,1)

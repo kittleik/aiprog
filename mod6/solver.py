@@ -117,7 +117,6 @@ class Solver():
 
     def doMove(self, move):
         if move == "up":
-            print "up"
             self.train_data += self.board.generateState(self.board.grid)
             self.train_data.append(0)
             self.board.upAddition(self.board.swipeUp(self.board.grid),False)
@@ -125,7 +124,6 @@ class Solver():
             self.root.update()
 
         if move == "down":
-            print "down"
 
             self.train_data += self.board.generateState(self.board.grid)
             self.train_data.append(1)
@@ -133,7 +131,6 @@ class Solver():
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "left":
-            print "left"
 
             self.train_data += self.board.generateState(self.board.grid)
             self.train_data.append(2)
@@ -141,7 +138,6 @@ class Solver():
             self.gui.update_view(self.board.generateState(self.board.grid))
             self.root.update()
         if move == "right":
-            print "right"
 
             self.train_data += self.board.generateState(self.board.grid)
             self.train_data.append(3)
@@ -191,12 +187,9 @@ class Solver():
         self.gui.update_view(self.board.generateState(self.board.grid))
         self.root.update()
         moveTodo = self.converNumberToDirection(self.expectimax(self.board.grid, 3, 0)[1])
-        print moveTodo
         #moveTodo = "up"
 
         while True:
-            print "POINTS========> >  > " + str(self.board.points) + " <  < <========POINTS"
-            print "BEST-TILE = | " + str(2 ** self.board.bestTile) + " |"
 
             gridBeforeMove = copy.deepcopy(self.board.grid)
             self.doMove(moveTodo)

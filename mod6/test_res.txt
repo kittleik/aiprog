@@ -1,0 +1,198 @@
+Epochs per game: 10
+Number of neurons: [17, 5000, 5000, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 99.52
+Average ANN tile: 220
+P-value: 0.0000000002
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 127.36
+Average ANN tile: 211
+P-value: 0.0000055681
+Number of demo points: 6/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 1000, 4]
+List of fuctions: ['rectify', 'softmax']
+Average random tile: 113.92
+Average ANN tile: 177
+P-value: 0.0005008310
+Number of demo points: 4/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 100.8
+Average ANN tile: 235
+P-value: 0.0000000000
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 1
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 104.96
+Average ANN tile: 180
+P-value: 0.0000003694
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 30
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 111.36
+Average ANN tile: 156
+P-value: 0.0027935122
+Number of demo points: 3/7
+
+-----------------------------------------------------------------------
+Epochs per game: 30
+Number of neurons: [17, 100, 100, 100, 100, 100, 100, 4]
+List of fuctions: ['rectify', 'rectify', 'rectify', 'rectify', 'rectify', 'rectify', 'softmax']
+ANN results worse than random
+Make sure you send random results is the first argument
+Number of demo points: 0
+
+-----------------------------------------------------------------------
+Epochs per game: 300
+Number of neurons: [17, 100, 100, 100, 100, 100, 100, 4]
+List of fuctions: ['rectify', 'rectify', 'rectify', 'rectify', 'rectify', 'rectify', 'softmax']
+ANN results worse than random
+Make sure you send random results is the first argument
+Number of demo points: 0
+
+-----------------------------------------------------------------------
+Epochs per game: 100
+Number of neurons: [17, 1000, 4]
+List of fuctions: ['rectify', 'softmax']
+Average random tile: 92.8
+Average ANN tile: 206
+P-value: 0.0000002307
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 1000, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'rectify', 'softmax']
+Average random tile: 98.88
+Average ANN tile: 225
+P-value: 0.0000000168
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 50
+Number of neurons: [17, 500, 1000, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'rectify', 'softmax']
+Average random tile: 112.64
+Average ANN tile: 207
+P-value: 0.0000196903
+Number of demo points: 5/7
+
+-----------------------------------------------------------------------
+Epochs per game: 1
+Number of neurons: [17, 500, 1000, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'rectify', 'softmax']
+Average random tile: 100.48
+Average ANN tile: 211
+P-value: 0.0000001217
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 1
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 103.04
+Average ANN tile: 181
+P-value: 0.0000000101
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 119.68
+Average ANN tile: 224
+P-value: 0.0000000832
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 1
+Number of neurons: [17, 1000, 1000, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 110.72
+Average ANN tile: 218
+P-value: 0.0000001261
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 1000, 1000, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 111.36
+Average ANN tile: 200
+P-value: 0.0000179157
+Number of demo points: 5/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['sigmoid', 'sigmoid', 'softmax']
+Average random tile: 103.04
+Average ANN tile: 172
+P-value: 0.0000077851
+Number of demo points: 6/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['sigmoid', 'rectify', 'softmax']
+Average random tile: 114.56
+Average ANN tile: 189
+P-value: 0.0000603895
+Number of demo points: 5/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'sigmoid', 'softmax']
+Average random tile: 110.72
+Average ANN tile: 190
+P-value: 0.0000036909
+Number of demo points: 6/7
+
+-----------------------------------------------------------------------
+CHANGING TO POWER OF 2
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 113.28
+Average ANN tile: 184
+P-value: 0.0000393726
+Number of demo points: 5/7
+
+-----------------------------------------------------------------------
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 115.84
+Average ANN tile: 176
+P-value: 0.0000133358
+Number of demo points: 5/7
+
+-----------------------------------------------------------------------
+CHANGING BACK
+Epochs per game: 10
+Number of neurons: [17, 500, 500, 4]
+List of fuctions: ['rectify', 'rectify', 'softmax']
+Average random tile: 113.28
+Average ANN tile: 224
+P-value: 0.0000000018
+Number of demo points: 7/7
+
+-----------------------------------------------------------------------
